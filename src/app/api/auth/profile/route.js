@@ -1,0 +1,56 @@
+import { NextResponse } from 'next/server';
+import connectDB from '@/lib/mongodb';
+import User from '@/models/User';
+import { getAuthUser } from '@/lib/auth';
+
+export async function PUT(request) {
+    try {
+        await connectDB();
+
+        const decoded = await getAuthUser();
+        if (!decoded) {
+            return NextResponse.json(
+                { message: 'Login required' },
+                { status: 401 }
+            );
+        }
+
+        const { name, phone, address, dateOfBirth } = await request.json();
+
+        if (!name || !phone) {
+            return NextResponse.json(
+                { message: 'Name and phone are required' },
+                { status: 400 }
+            );
+        }
+
+        const user = await User.findByIdAndUpdate(
+            decoded.id,
+            {
+                name,
+                phone,
+                address,
+                dateOfBirth: dateOfBirth || null,
+            },
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        if (!user) {
+            return NextResponse.json(
+                { message: 'User not found' },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json(
+            { message: 'Profile updated successfully', user },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error('Profile update error:', error);
+        return NextResponse.json(
+            { message: 'Internal server error' },
+            { status: 500 }
+        );
+    }
+}
