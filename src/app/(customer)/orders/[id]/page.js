@@ -247,6 +247,9 @@ export default function OrderDetailPage() {
                                 <p className="text-black/40 text-xs">
                                     ৳{item.price.toLocaleString()} × {item.quantity}
                                 </p>
+                                {item.note && (
+                                    <p className="text-amber-700 text-xs italic mt-0.5">📝 "{item.note}"</p>
+                                )}
                             </div>
 
                             {/* Subtotal */}

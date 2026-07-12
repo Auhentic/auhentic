@@ -256,9 +256,14 @@ export default function AdminOrdersPage() {
                                     {/* Items */}
                                     <div className="flex flex-col gap-1 pl-7">
                                         {order.items.map((item, i) => (
-                                            <div key={i} className="flex justify-between text-xs">
-                                                <span className="text-black/70">{item.name}{item.variant ? ` (${item.variant})` : ''} x{item.quantity}</span>
-                                                <span className="text-black/50">৳{(item.price * item.quantity).toLocaleString()}</span>
+                                            <div key={i} className="flex flex-col gap-0.5">
+                                                <div className="flex justify-between text-xs">
+                                                    <span className="text-black/70">{item.name}{item.variant ? ` (${item.variant})` : ''} x{item.quantity}</span>
+                                                    <span className="text-black/50">৳{(item.price * item.quantity).toLocaleString()}</span>
+                                                </div>
+                                                {item.note && (
+                                                    <p className="text-amber-700 text-xs italic pl-2">📝 "{item.note}"</p>
+                                                )}
                                             </div>
                                         ))}
                                     </div>

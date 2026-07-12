@@ -30,6 +30,7 @@ export default function CheckoutPage() {
     const [productDetails, setProductDetails] = useState([]);
     const [districtSearch, setDistrictSearch] = useState('');
     const [districtOpen, setDistrictOpen] = useState(false);
+    const [itemNotes, setItemNotes] = useState({});
 
     const [form, setForm] = useState({
         name: '',
@@ -129,6 +130,10 @@ export default function CheckoutPage() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [router]);
 
+    function itemKey(item) {
+        return `${item.productId}-${item.variant || 'default'}`;
+    }
+
     function handleChange(e) {
         setForm({ ...form, [e.target.name]: e.target.value });
         setError('');
@@ -218,6 +223,7 @@ export default function CheckoutPage() {
                     price: item.price,
                     quantity: item.quantity,
                     variant: item.variant || null,
+                    note: itemNotes[itemKey(item)]?.trim() || '',
                 })),
                 shippingAddress: {
                     street: form.street,
@@ -476,14 +482,26 @@ export default function CheckoutPage() {
                         <h2 className="font-semibold mb-4 text-black">Order Summary</h2>
                         <div className="flex flex-col gap-3">
                             {cart.map((item) => (
-                                <div key={`${item.productId}-${item.variant || 'default'}-${item.quantity}`} className="flex justify-between text-sm">
-                                    <span className="text-black/70">
-                                        {item.name}{' '}
-                                        <span className="text-black/40">x{item.quantity}</span>
-                                    </span>
-                                    <span className="text-black font-medium">
-                                        ৳{(item.price * item.quantity).toLocaleString()}
-                                    </span>
+                                <div key={`${item.productId}-${item.variant || 'default'}-${item.quantity}`} className="flex flex-col gap-1.5">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-black/70">
+                                            {item.name}{item.variant ? ` (${item.variant})` : ''}{' '}
+                                            <span className="text-black/40">x{item.quantity}</span>
+                                        </span>
+                                        <span className="text-black font-medium">
+                                            ৳{(item.price * item.quantity).toLocaleString()}
+                                        </span>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={itemNotes[itemKey(item)] || ''}
+                                        onChange={(e) =>
+                                            setItemNotes((prev) => ({ ...prev, [itemKey(item)]: e.target.value }))
+                                        }
+                                        placeholder={`Special request for ${item.name} (optional) — e.g. "extra mayo" or "write Happy Birthday"`}
+                                        maxLength={300}
+                                        className="glass-input text-xs py-1.5 px-3 rounded-full w-full"
+                                    />
                                 </div>
                             ))}
 

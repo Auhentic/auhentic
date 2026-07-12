@@ -1,46 +1,51 @@
 import mongoose from 'mongoose';
 
 const orderItemSchema = new mongoose.Schema({
-    productId: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Product', 
-        required: true 
+    productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+        required: true
     },
-    name: { 
-        type: String, 
-        required: true 
+    name: {
+        type: String,
+        required: true
     },
-    image: { 
-        type: String, 
-        required: true 
+    image: {
+        type: String,
+        required: true
     },
-    price: { 
-        type: Number, 
-        required: true 
+    price: {
+        type: Number,
+        required: true
     },
-    quantity: { 
-        type: Number, 
-        required: true, 
-        min: 1 
+    quantity: {
+        type: Number,
+        required: true,
+        min: 1
     },
-    variant: { 
-        type: String, 
-        default: null 
+    variant: {
+        type: String,
+        default: null
+    },
+    note: {
+        type: String,
+        default: '',
+        maxlength: 300,
     },
 });
 
 const statusHistorySchema = new mongoose.Schema({
-    status: { 
-        type: String, 
-        required: true 
+    status: {
+        type: String,
+        required: true
     },
-    note: { 
-        type: String, 
-        default: '' 
+    note: {
+        type: String,
+        default: ''
     },
-    updatedAt: { 
-        type: Date, 
-        default: Date.now 
+    updatedAt: {
+        type: Date,
+        default: Date.now
     },
 }, { _id: false });
 
@@ -58,22 +63,22 @@ const orderSchema = new mongoose.Schema(
         },
         items: [orderItemSchema],
         shippingAddress: {
-            street: { 
-                type: String, 
-                required: true 
+            street: {
+                type: String,
+                required: true
             },
-            city: { 
-                type: String, 
-                required: true 
+            city: {
+                type: String,
+                required: true
             },
-            district: { 
-                type: String, 
-                required: true 
+            district: {
+                type: String,
+                required: true
             },
             postalCode: String,
-            phone: { 
-                type: String, 
-                required: true 
+            phone: {
+                type: String,
+                required: true
             },
         },
         paymentMethod: {
@@ -93,29 +98,29 @@ const orderSchema = new mongoose.Schema(
             default: 'placed',
         },
         statusHistory: [statusHistorySchema],
-        subtotal: { 
-            type: Number, 
-            required: true 
+        subtotal: {
+            type: Number,
+            required: true
         },
-        shippingCost: { 
-            type: Number, 
-            default: 0 
+        shippingCost: {
+            type: Number,
+            default: 0
         },
-        total: { 
-            type: Number, 
-            required: true 
+        total: {
+            type: Number,
+            required: true
         },
-        note: { 
-            type: String, 
-            default: '' 
+        note: {
+            type: String,
+            default: ''
         },
         // Soft-delete: admin archived the card from done-product view
         // Does NOT affect revenue — dashboard still counts this order's total
-        isArchivedByAdmin: { 
-            type: Boolean, 
-            default: false 
+        isArchivedByAdmin: {
+            type: Boolean,
+            default: false
         },
-        
+
         // Sequential human-readable order number, e.g. AUH-630
         orderNumber: {
             type: Number,

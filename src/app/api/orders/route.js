@@ -158,6 +158,7 @@ export async function POST(request) {
                 price,
                 quantity: item.quantity,
                 variant: item.variant || null,
+                note: typeof item.note === 'string' ? item.note.trim().slice(0, 300) : '',
             });
 
             subtotal += price * item.quantity;

@@ -19,7 +19,7 @@ export default async function ContactPage() {
 
     return (
         <div className="max-w-3xl mx-auto px-4 py-12">
-            <h1 className="text-2xl font-bold text-white mb-8">Contact Us</h1>
+            <h1 className="text-2xl font-bold text-[#3E2723] mb-8">Contact Us</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -27,11 +27,11 @@ export default async function ContactPage() {
                 <div className="flex flex-col gap-4">
 
                     {settings?.phone && (
-                        <div className="glass p-5">
-                            <p className="text-white/50 text-xs mb-1">Phone</p>
+                        <div className="glass p-5 rounded-3xl">
+                            <p className="text-[#3E2723]/50 text-xs mb-1">Phone</p>
                             <a
                                 href={`tel:${settings.phone}`}
-                                className="text-white font-medium hover:text-blue-400 transition"
+                                className="text-[#3E2723] font-medium hover:text-blue-400 transition"
                             >
                                 📞 {settings.phone}
                             </a>
@@ -39,13 +39,13 @@ export default async function ContactPage() {
                     )}
 
                     {settings?.whatsapp && (
-                        <div className="glass p-5">
-                            <p className="text-white/50 text-xs mb-1">WhatsApp</p>
+                        <div className="glass p-5 rounded-3xl">
+                            <p className="text-[#3E2723]/50 text-xs mb-1">WhatsApp</p>
                             <a
                                 href={`https://wa.me/88${settings.whatsapp}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-white font-medium hover:text-green-400 transition"
+                                className="text-[#3E2723] font-medium hover:text-green-400 transition"
                             >
                                 💬 {settings.whatsapp}
                             </a>
@@ -53,11 +53,11 @@ export default async function ContactPage() {
                     )}
 
                     {settings?.email && (
-                        <div className="glass p-5">
-                            <p className="text-white/50 text-xs mb-1">Email</p>
+                        <div className="glass p-5 rounded-3xl">
+                            <p className="text-[#3E2723]/50 text-xs mb-1">Email</p>
                             <a
                                 href={`mailto:${settings.email}`}
-                                className="text-white font-medium hover:text-blue-400 transition"
+                                className="text-[#3E2723] font-medium hover:text-blue-400 transition"
                             >
                                 ✉️ {settings.email}
                             </a>
@@ -65,18 +65,18 @@ export default async function ContactPage() {
                     )}
 
                     {settings?.address && (
-                        <div className="glass p-5">
-                            <p className="text-white/50 text-xs mb-1">Address</p>
-                            <p className="text-white font-medium">
+                        <div className="glass p-5 rounded-3xl">
+                            <p className="text-[#3E2723]/50 text-xs mb-1">Address</p>
+                            <p className="text-[#3E2723] font-medium">
                                 📍 {settings.address}
                             </p>
                         </div>
                     )}
 
                     {settings?.deliveryAreas && (
-                        <div className="glass p-5">
-                            <p className="text-white/50 text-xs mb-1">Delivery Areas</p>
-                            <p className="text-white font-medium">
+                        <div className="glass p-5 rounded-3xl">
+                            <p className="text-[#3E2723]/50 text-xs mb-1">Delivery Areas</p>
+                            <p className="text-[#3E2723] font-medium">
                                 🚚 {settings.deliveryAreas}
                             </p>
                         </div>
@@ -88,15 +88,15 @@ export default async function ContactPage() {
                 <div className="flex flex-col gap-4">
 
                     {(settings?.facebook || settings?.instagram) && (
-                        <div className="glass p-5">
-                            <p className="text-white/50 text-xs mb-3">Follow Us</p>
+                        <div className="glass p-5 rounded-3xl">
+                            <p className="text-[#3E2723]/50 text-xs mb-3">Follow Us</p>
                             <div className="flex flex-col gap-3">
                                 {settings?.facebook && (
                                     <a
                                         href={settings.facebook}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-white/70 hover:text-white transition text-sm"
+                                        className="text-[#3E2723]/70 hover:text-[#3E2723] transition text-sm"
                                     >
                                         👍 Facebook Page
                                     </a>
@@ -106,7 +106,7 @@ export default async function ContactPage() {
                                         href={settings.instagram}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-white/70 hover:text-white transition text-sm"
+                                        className="text-[#3E2723]/70 hover:text-[#3E2723] transition text-sm"
                                     >
                                         📸 Instagram
                                     </a>
@@ -115,24 +115,24 @@ export default async function ContactPage() {
                         </div>
                     )}
 
-                    <div className="glass p-5">
-                        <p className="text-white/50 text-xs mb-2">Business Hours</p>
-                        <p className="text-white text-sm">
+                    <div className="glass p-5 rounded-3xl">
+                        <p className="text-[#3E2723]/50 text-xs mb-2">Business Hours</p>
+                        <p className="text-[#3E2723] text-sm">
                             Saturday – Thursday
                         </p>
-                        <p className="text-white/60 text-sm">
+                        <p className="text-[#3E2723]/60 text-sm">
                             10:00 AM – 10:00 PM
                         </p>
-                        <p className="text-white/40 text-xs mt-2">
+                        <p className="text-[#3E2723]/40 text-xs mt-2">
                             Friday: Closed
                         </p>
                     </div>
 
-                    <div className="glass p-5">
-                        <p className="text-white font-medium mb-2">
+                    <div className="glass p-5 rounded-3xl">
+                        <p className="text-[#3E2723] font-medium mb-2">
                             Need help with your order?
                         </p>
-                        <p className="text-white/50 text-sm">
+                        <p className="text-[#3E2723]/50 text-sm">
                             WhatsApp or call us directly for fastest response.
                             We typically reply within 30 minutes during business hours.
                         </p>
