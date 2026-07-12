@@ -80,15 +80,14 @@ export default async function HomePage() {
               Total hero   flex-grow 6 = 100% of calc(100vh - navbar)
             */}
             <section
-                className="w-full flex flex-col gap-4 px-4 py-4"
-                style={{ height: 'calc(100vh - var(--navbar-height, 68px))' }}
+                className="w-full flex flex-col gap-4 px-4 py-4 lg:h-[calc(100vh-var(--navbar-height,68px))] h-auto"
             >
                 {/* Top Selling — 40% */}
-                <div style={{ flex: '4 1 0%', minHeight: 0 }}>
+                <div className="w-full lg:flex-[4_1_0%] lg:min-h-0">
                     {topSelling.length > 0 ? (
                         <TopSellingSlider products={topSelling} />
                     ) : (
-                        <div className="w-full h-full rounded-2xl glass flex items-center justify-center">
+                        <div className="w-full h-full rounded-2xl glass flex items-center justify-center min-h-[200px]">
                             <p className="text-white/50 text-sm">
                                 No top selling products yet — mark some from Admin → Products
                             </p>
@@ -98,7 +97,7 @@ export default async function HomePage() {
 
                 {/* Ongoing Offer Row — 20% */}
                 {offerProducts.length > 0 && (
-                    <div style={{ flex: '2 1 0%', minHeight: 0 }}>
+                    <div className="w-full lg:flex-[2_1_0%] lg:min-h-0">
                         <ProductScrollRow
                             title="Ongoing Offer Product"
                             icon="🏷️"

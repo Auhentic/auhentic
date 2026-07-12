@@ -38,6 +38,13 @@ export default function ProductDetailPage() {
             method: 'POST',
             body: JSON.stringify({ type: 'product_view', productId: id, path: `/products/${id}` }),
         }).catch(() => { });
+
+        if (typeof window !== 'undefined' && window.fbq) {
+            window.fbq('track', 'ViewContent', {
+                content_ids: [id],
+                content_type: 'product',
+            });
+        }
     }, [id]);
 
     useEffect(() => {

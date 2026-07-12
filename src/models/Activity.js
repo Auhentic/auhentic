@@ -19,6 +19,7 @@ const activitySchema = new mongoose.Schema(
 
 activitySchema.index({ user: 1, createdAt: -1 });
 activitySchema.index({ product: 1 });
+activitySchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 90 });
 
 const Activity = mongoose.models.Activity || mongoose.model('Activity', activitySchema);
 export default Activity;

@@ -141,9 +141,16 @@ export default function TeamPage() {
                                         ⏱ {Math.round(user.totalTimeSeconds / 60)} min on site
                                     </p>
                                     {user.topProducts?.length > 0 && (
-                                        <p className="text-black/40 text-xs">
-                                            👀 Viewed: {user.topProducts.map((p) => p.name).filter(Boolean).join(', ')}
-                                        </p>
+                                        <div className="text-black/40 text-xs">
+                                            <p>👀 Viewed:</p>
+                                            {user.topProducts.map((p, i) => (
+                                                <p key={i} className="ml-3">
+                                                    • {p.name} — last seen {new Date(p.lastViewedAt).toLocaleString('en-BD', {
+                                                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                                                    })}
+                                                </p>
+                                            ))}
+                                        </div>
                                     )}
                                 </div>
                             </div>

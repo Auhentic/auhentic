@@ -8,6 +8,9 @@ export default function AdminRegisterPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showSetupKey, setShowSetupKey] = useState(false);
 
     const [form, setForm] = useState({
         name: '',
@@ -119,27 +122,63 @@ export default function AdminRegisterPage() {
                             <label className="text-black/70 text-xs mb-1 block font-medium">
                                 Password
                             </label>
-                            <input
-                                name="password"
-                                type="password"
-                                value={form.password}
-                                onChange={handleChange}
-                                placeholder="Min 6 characters"
-                                className="glass-input rounded-3xl text-black text-sm w-full"
-                            />
+                            <div className="relative">
+                                <input
+                                    name="password"
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={form.password}
+                                    onChange={handleChange}
+                                    placeholder="Min 6 characters"
+                                    className="glass-input rounded-3xl text-black text-sm w-full pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition"
+                                >
+                                    {showPassword ? (
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                        </svg>
+                                    ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                        </svg>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                         <div>
                             <label className="text-black/70 text-xs mb-1 block font-medium">
                                 Confirm Password
                             </label>
-                            <input
-                                name="confirmPassword"
-                                type="password"
-                                value={form.confirmPassword}
-                                onChange={handleChange}
-                                placeholder="Repeat password"
-                                className="glass-input rounded-3xl text-black text-sm w-full"
-                            />
+                            <div className="relative">
+                                <input
+                                    name="confirmPassword"
+                                    type={showConfirmPassword ? 'text' : 'password'}
+                                    value={form.confirmPassword}
+                                    onChange={handleChange}
+                                    placeholder="Repeat password"
+                                    className="glass-input rounded-3xl text-black text-sm w-full pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition"
+                                >
+                                    {showConfirmPassword ? (
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                        </svg>
+                                    ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                        </svg>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -153,14 +192,32 @@ export default function AdminRegisterPage() {
                                 Provided by developer
                             </span>
                         </div>
-                        <input
-                            name="setupKey"
-                            type="password"
-                            value={form.setupKey}
-                            onChange={handleChange}
-                            placeholder="Enter system setup key"
-                            className="glass-input rounded-3xl text-black text-sm w-full"
-                        />
+                        <div className="relative">
+                            <input
+                                name="setupKey"
+                                type={showSetupKey ? 'text' : 'password'}
+                                value={form.setupKey}
+                                onChange={handleChange}
+                                placeholder="Enter system setup key"
+                                className="glass-input rounded-3xl text-black text-sm w-full pr-10"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowSetupKey(!showSetupKey)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition"
+                            >
+                                {showSetupKey ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                    </svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    </svg>
+                                )}
+                            </button>
+                        </div>
                     </div>
 
                     <button

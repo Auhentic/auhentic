@@ -26,6 +26,9 @@ function ProductsPageInner() {
     const [categories, setCategories] = useState([]);
     // const navSearchParams = useSearchParams(); // if client component
     const navSearch = searchParams.get('search') || '';
+    const [sortBy, setSortBy] = useState('none'); // 'none' | 'lowToHigh' | 'highToLow'
+    const [minPrice, setMinPrice] = useState('');
+    const [maxPrice, setMaxPrice] = useState('');
 
     useEffect(() => {
         async function fetchProducts() {
@@ -78,8 +81,23 @@ function ProductsPageInner() {
             );
         }
 
+        // filter by price range
+        if (minPrice !== '') {
+            result = result.filter((p) => p.price >= Number(minPrice));
+        }
+        if (maxPrice !== '') {
+            result = result.filter((p) => p.price <= Number(maxPrice));
+        }
+
+        // sort by price
+        if (sortBy === 'lowToHigh') {
+            result = [...result].sort((a, b) => a.price - b.price);
+        } else if (sortBy === 'highToLow') {
+            result = [...result].sort((a, b) => b.price - a.price);
+        }
+
         setFiltered(result);
-    }, [search, category, products, offerOnly, limitedOnly]);
+    }, [search, category, products, offerOnly, limitedOnly, sortBy, minPrice, maxPrice]);
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-12">
@@ -114,13 +132,44 @@ function ProductsPageInner() {
                     ))}
                 </select>
 
+                <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="glass-input rounded-lg w-full"
+                >
+                    <option value="none">Sort: Default</option>
+                    <option value="lowToHigh">Price: Low to High</option>
+                    <option value="highToLow">Price: High to Low</option>
+                </select>
+
+                {/* Price range */}
+                <input
+                    type="number"
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(e.target.value)}
+                    placeholder="Min ৳"
+                    min={0}
+                    className="glass-input rounded-lg w-full"
+                />
+                <input
+                    type="number"
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(e.target.value)}
+                    placeholder="Max ৳"
+                    min={0}
+                    className="glass-input rounded-lg w-full"
+                />
+
                 {/* Clear Button — always visible, disabled when nothing to clear */}
                 <button
                     onClick={() => {
                         setSearch('');
                         setCategory('all');
+                        setSortBy('none');
+                        setMinPrice('');
+                        setMaxPrice('');
                     }}
-                    disabled={!search && category === 'all'}
+                    disabled={!search && category === 'all' && sortBy === 'none' && !minPrice && !maxPrice}
                     className="glass-btn rounded-lg w-full py-2 text-sm disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                     Clear Filters

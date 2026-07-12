@@ -257,7 +257,14 @@ export default function CheckoutPage() {
             fetch('/api/cart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: remaining }) }).catch(() => { });
 
             // redirect to order confirmation
-            router.push(`/orders/${data.data._id}?success=true`);
+            if (typeof window !== 'undefined' && window.fbq) {
+                window.fbq('track', 'Purchase', {
+                    value: total,
+                    currency: 'BDT',
+                });
+            }
+
+            router.push(`/orders/${data.data._id}?success=true${!user ? `&phone=${encodeURIComponent(form.phone)}` : ''}`);
         } catch {
             setError('Something went wrong. Please try again.');
         } finally {

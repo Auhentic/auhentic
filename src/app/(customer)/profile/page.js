@@ -11,6 +11,13 @@ export default function ProfilePage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [dobType, setDobType] = useState('text');
+    const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    const [pwError, setPwError] = useState('');
+    const [pwSuccess, setPwSuccess] = useState('');
+    const [pwSaving, setPwSaving] = useState(false);
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const [form, setForm] = useState({
         name: '',
@@ -53,6 +60,36 @@ export default function ProfilePage() {
         setForm({ ...form, [e.target.name]: e.target.value });
         setError('');
         setSuccess('');
+    }
+
+    async function handleChangePassword() {
+        setPwError('');
+        setPwSuccess('');
+
+        if (pwForm.newPassword !== pwForm.confirmPassword) {
+            return setPwError('New passwords do not match');
+        }
+
+        setPwSaving(true);
+        try {
+            const res = await fetch('/api/auth/change-password', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    currentPassword: pwForm.currentPassword,
+                    newPassword: pwForm.newPassword,
+                }),
+            });
+            const data = await res.json();
+            if (!res.ok) return setPwError(data.message);
+
+            setPwSuccess('Password changed successfully!');
+            setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        } catch {
+            setPwError('Something went wrong');
+        } finally {
+            setPwSaving(false);
+        }
     }
 
     async function handleSave() {
@@ -166,6 +203,96 @@ export default function ProfilePage() {
                         />
                     </div>
 
+                </div>
+            </div>
+
+            <div className="glass p-6 rounded-3xl mt-6 mb-3.5">
+                <h3 className="text-black font-semibold text-sm mb-4">Change Password</h3>
+                <div className="flex flex-col gap-3">
+                    <div className="relative">
+                        <input
+                            type={showCurrentPassword ? 'text' : 'password'}
+                            placeholder="Current password"
+                            value={pwForm.currentPassword}
+                            onChange={(e) => setPwForm({ ...pwForm, currentPassword: e.target.value })}
+                            className="glass-input rounded-3xl w-full pr-10"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition"
+                        >
+                            {showCurrentPassword ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                </svg>
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
+                    <div className="relative">
+                        <input
+                            type={showNewPassword ? 'text' : 'password'}
+                            placeholder="New password"
+                            value={pwForm.newPassword}
+                            onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })}
+                            className="glass-input rounded-3xl w-full pr-10"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowNewPassword(!showNewPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition"
+                        >
+                            {showNewPassword ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                </svg>
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
+                    <div className="relative">
+                        <input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            placeholder="Confirm new password"
+                            value={pwForm.confirmPassword}
+                            onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })}
+                            className="glass-input rounded-3xl w-full pr-10"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition"
+                        >
+                            {showConfirmPassword ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                </svg>
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
+                    {pwError && <p className="text-red-600 text-xs">{pwError}</p>}
+                    {pwSuccess && <p className="text-green-600 text-xs">{pwSuccess}</p>}
+                    <button
+                        onClick={handleChangePassword}
+                        disabled={pwSaving}
+                        className="glass-btn-primary px-6 py-2 w-auto text-sm"
+                    >
+                        {pwSaving ? 'Saving...' : 'Change Password'}
+                    </button>
                 </div>
             </div>
 

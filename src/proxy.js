@@ -11,9 +11,7 @@ export function proxy(request) {
 
     const isAdminPath = adminPaths.some((path) => pathname.startsWith(path));
     const isAuthPath = authPaths.some((path) => pathname.startsWith(path));
-    const isProtectedPath = protectedPaths.some((path) =>
-        pathname.startsWith(path)
-    );
+    const isProtectedPath = pathname.startsWith('/profile') || pathname === '/orders' || pathname === '/orders/';
 
     // verify token once
     let user = null;

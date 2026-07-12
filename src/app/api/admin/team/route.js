@@ -48,7 +48,7 @@ export async function GET(request) {
 
         const topProducts = await Activity.aggregate([
             { $match: { user: { $in: userIds }, type: 'product_view' } },
-            { $group: { _id: { user: '$user', product: '$product' }, views: { $sum: 1 } } },
+            { $group: { _id: { user: '$user', product: '$product' }, views: { $sum: 1 }, lastViewedAt: { $max: '$createdAt' } } },
             { $sort: { views: -1 } },
             {
                 $lookup: {
@@ -65,13 +65,14 @@ export async function GET(request) {
                         $push: {
                             name: { $arrayElemAt: ['$productInfo.name', 0] },
                             views: '$views',
+                            lastViewedAt: '$lastViewedAt',
                         },
                     },
                 },
             },
         ]);
         const productMap = Object.fromEntries(topProducts.map((p) => [p._id.toString(), p.products.slice(0, 3)]));
-        
+
         const usersWithStats = users.map((u) => ({
             ...u.toObject(),
             totalTimeSeconds: timeMap[u._id.toString()] || 0,

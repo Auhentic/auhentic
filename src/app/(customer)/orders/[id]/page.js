@@ -44,16 +44,25 @@ export default function OrderDetailPage() {
     useEffect(() => {
         async function fetchOrder() {
             try {
-                const res = await fetch(`/api/orders/${id}`);
+                const phone = searchParams.get('phone');
+                const url = phone ? `/api/orders/${id}?phone=${encodeURIComponent(phone)}` : `/api/orders/${id}`;
+                const res = await fetch(url);
+
                 if (res.status === 401) {
                     router.push('/auth/login');
                     return;
                 }
                 if (res.status === 403) {
-                    router.push('/orders');
+                    setError('This order could not be verified. Please check your order link, or use Track Order with your phone number.');
+                    setLoading(false);
                     return;
                 }
                 const data = await res.json();
+                if (!res.ok) {
+                    setError(data.message || 'Failed to load order');
+                    setLoading(false);
+                    return;
+                }
                 setOrder(data.data);
             } catch {
                 setError('Failed to load order');
@@ -62,7 +71,7 @@ export default function OrderDetailPage() {
             }
         }
         fetchOrder();
-    }, [id, router]);
+    }, [id, router, searchParams]);
 
     if (loading) {
         return (

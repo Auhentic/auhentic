@@ -31,6 +31,7 @@ export default function AdminProductsPage() {
     // existingImages = images already saved in DB (edit mode)
     const [existingImages, setExistingImages] = useState([]);
     const fileRef = useRef();
+    const [search, setSearch] = useState('');
 
     const emptyForm = {
         name: '',
@@ -655,6 +656,14 @@ export default function AdminProductsPage() {
                 </div>
             )}
 
+            <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search products by name..."
+                className="glass-input rounded-3xl w-full mb-4"
+            />
+
             {/* Products List */}
             {loading ? (
                 <div className="glass rounded-3xl text-black p-8 text-center">Loading products...</div>
@@ -664,76 +673,79 @@ export default function AdminProductsPage() {
                 </div>
             ) : (
                 <div className="flex flex-col gap-4">
-                    {products.map((product) => (
-                        <div
-                            key={product._id}
-                            className="glass rounded-3xl text-black p-4 flex flex-col md:flex-row md:items-center gap-4"
-                        >
-                            {/* Image */}
-                            <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-white/5 shrink-0">
-                                {product.images?.[0]?.url ? (
-                                    <Image
-                                        src={product.images[0].url}
-                                        alt={product.name}
-                                        fill
-                                        className="object-cover"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-black/40 text-xs">
-                                        No img
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Info */}
-                            <div className="flex-1">
-                                <p className="text-black font-medium text-sm">{product.name}</p>
-                                <p className="text-black/60 text-xs">{product.category}</p>
-                                <div className="flex items-center gap-2">
-                                    <p className="text-blue-600 text-sm font-bold">৳{product.price.toLocaleString()}</p>
-                                    {product.offer?.isOnOffer && (
-                                        <span className="text-xs bg-green-500/20 text-green-700 border border-green-500/30 px-2 py-0.5 rounded-full">
-                                            {product.offer.discountPercent}% off
-                                            {product.offer.offerLabel ? ` · ${product.offer.offerLabel}` : ''}
-                                        </span>
-                                    )}
-                                    {product.isTopSelling && (
-                                        <span className="text-xs bg-orange-500/20 text-orange-700 border border-orange-500/30 px-2 py-0.5 rounded-full">
-                                            🔥 Top Selling
-                                        </span>
+                    {products
+                        .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .map((product) => (
+                            <div
+                                key={product._id}
+                                className="glass rounded-3xl text-black p-4 flex flex-col md:flex-row md:items-center gap-4"
+                            >
+                                {/* Image */}
+                                <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-white/5 shrink-0">
+                                    {product.images?.[0]?.url ? (
+                                        <Image
+                                            src={product.images[0].url}
+                                            alt={product.name}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-black/40 text-xs">
+                                            No img
+                                        </div>
                                     )}
                                 </div>
-                            </div>
 
-                            {/* Live Stock Update */}
-                            <div className="flex items-center gap-2">
-                                <div className="text-black/60 text-xs">Stock:</div>
-                                <input
-                                    type="number"
-                                    defaultValue={product.stock}
-                                    min={0}
-                                    onBlur={(e) => handleStockUpdate(product._id, e.target.value)}
-                                    className="glass-input w-20 text-sm text-center py-1 text-black"
-                                />
-                            </div>
+                                {/* Info */}
+                                <div className="flex-1">
+                                    <p className="text-black font-medium text-sm">{product.name}</p>
+                                    <p className="text-black/60 text-xs">{product.category}</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-blue-600 text-sm font-bold">৳{product.price.toLocaleString()}</p>
+                                        {product.offer?.isOnOffer && (
+                                            <span className="text-xs bg-green-500/20 text-green-700 border border-green-500/30 px-2 py-0.5 rounded-full">
+                                                {product.offer.discountPercent}% off
+                                                {product.offer.offerLabel ? ` · ${product.offer.offerLabel}` : ''}
+                                            </span>
+                                        )}
+                                        {product.isTopSelling && (
+                                            <span className="text-xs bg-orange-500/20 text-orange-700 border border-orange-500/30 px-2 py-0.5 rounded-full">
+                                                🔥 Top Selling
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
 
-                            {/* Actions */}
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => openEditForm(product)}
-                                    className="glass-btn text-xs px-3 py-1 w-auto"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(product._id)}
-                                    className="bg-red-500/20 border border-red-500/30 text-red-700 text-xs px-3 py-1 rounded-lg hover:bg-red-500/30 transition w-auto"
-                                >
-                                    Delete
-                                </button>
+                                {/* Live Stock Update */}
+                                <div className="flex items-center gap-2">
+                                    <div className="text-black/60 text-xs">Stock:</div>
+                                    <input
+                                        type="number"
+                                        defaultValue={product.stock}
+                                        min={0}
+                                        onBlur={(e) => handleStockUpdate(product._id, e.target.value)}
+                                        className="glass-input w-20 text-sm text-center py-1 text-black"
+                                    />
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => openEditForm(product)}
+                                        className="glass-btn text-xs px-3 py-1 w-auto"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(product._id)}
+                                        className="bg-red-500/20 border border-red-500/30 text-red-700 text-xs px-3 py-1 rounded-lg hover:bg-red-500/30 transition w-auto"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
                 </div>
             )}
         </div>

@@ -238,6 +238,19 @@ export default function AdminOrdersPage() {
                                         <p>Phone: <span className="text-black/70">{order.shippingAddress?.phone}</span></p>
                                         <p>Address: <span className="text-black/70">{order.shippingAddress?.street}, {order.shippingAddress?.city}</span></p>
                                         <p>Payment: <span className="text-black/70 uppercase">{order.paymentMethod}</span></p>
+
+                                        {order.shippingAddress?.phone && (
+                                            <a
+                                                href={`https://wa.me/${order.shippingAddress.phone.replace(/^0/, '880')}?text=${encodeURIComponent(
+                                                    `Hi ${order.guestInfo?.name || order.user?.name || 'there'},\nconfirming your Auhentic order #${order.orderNumber ? `AUH-${order.orderNumber}` : ''}\ntotal ৳${order.total}.\nReply to confirm!`
+                                                )}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-block mt-2 glass-btn px-3 py-1.5 text-xs w-auto"
+                                            >
+                                                📱 Verify on WhatsApp
+                                            </a>
+                                        )}
                                     </div>
 
                                     {/* Items */}

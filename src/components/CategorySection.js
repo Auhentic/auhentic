@@ -39,7 +39,7 @@ export default function CategorySection({ categoryRows }) {
             {/* One scrollable row per visible category */}
             <div className="flex flex-col gap-8">
                 {visibleRows.map((row) => (
-                    <div key={row.name} style={{ height: '220px' }}>
+                    <div key={row.name} className="h-auto">
                         <ProductScrollRow
                             title={row.name}
                             icon={row.icon}

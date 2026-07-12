@@ -6,45 +6,39 @@ import { getAuthUser } from '@/lib/auth';
 // GET single order
 export async function GET(request, { params }) {
     try {
-        const user = await getAuthUser();
-        if (!user) {
-            return NextResponse.json(
-                { message: 'Login required!' },
-                { status: 401 }
-            );
-        }
-
+        const user = await getAuthUser(); // null for guests, that's fine now
         await connectDB();
         const { id } = await params;
 
-        const order = await Order.findById(id)
-            .populate('user', 'name email phone');
+        const order = await Order.findById(id).populate('user', 'name email phone');
 
         if (!order) {
-            return NextResponse.json(
-                { message: 'Order not found!' },
-                { status: 404 }
-            );
+            return NextResponse.json({ message: 'Order not found!' }, { status: 404 });
         }
 
-        // Customer can only see their own order!
-        if (user.role !== 'admin' && order.user?._id.toString() !== user.id) {
-            return NextResponse.json(
-                { message: 'Access denied!' },
-                { status: 403 }
-            );
+        if (user) {
+            // Logged-in customer can only see their own order; admin sees any
+            if (user.role !== 'admin' && order.user?._id.toString() !== user.id) {
+                return NextResponse.json({ message: 'Access denied!' }, { status: 403 });
+            }
+        } else {
+            // Guest order — must prove they know the phone number on it
+            const { searchParams } = new URL(request.url);
+            const phone = searchParams.get('phone');
+            const orderPhone = order.guestInfo?.phone || order.shippingAddress?.phone;
+
+            if (order.user) {
+                // This order belongs to a real account — guests can't view it at all
+                return NextResponse.json({ message: 'Login required!' }, { status: 401 });
+            }
+            if (!phone || phone !== orderPhone) {
+                return NextResponse.json({ message: 'Phone number required to view this order' }, { status: 403 });
+            }
         }
 
-        return NextResponse.json(
-            { success: true, data: order },
-            { status: 200 }
-        );
-
+        return NextResponse.json({ success: true, data: order }, { status: 200 });
     } catch (err) {
-        return NextResponse.json(
-            { message: err.message },
-            { status: 500 }
-        );
+        return NextResponse.json({ message: err.message }, { status: 500 });
     }
 }
 

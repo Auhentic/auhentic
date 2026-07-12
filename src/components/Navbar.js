@@ -59,7 +59,7 @@ export default function Navbar() {
     return (
         <nav className="w-full sticky top-0 z-50 glass border-b border-black/10">
             {/* Main Desktop Flex Container */}
-            <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div className="max-w-[95%] mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
 
                 {/* Logo */}
                 <Link href="/" className="flex items-center">
@@ -93,6 +93,10 @@ export default function Navbar() {
                         </Link>
                     )}
                 </div>
+
+                <Link href="/track-order" className="text-black/70 hover:text-black transition text-sm">
+                    Track Order
+                </Link>
 
                 {/* Desktop Search */}
                 <form onSubmit={handleSearch} className="hidden md:flex items-center gap-2">
