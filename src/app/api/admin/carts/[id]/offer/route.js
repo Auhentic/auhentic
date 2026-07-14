@@ -1,6 +1,7 @@
 import connectDB from '@/lib/mongodb';
 import Cart from '@/models/Cart';
 import { NextResponse } from 'next/server';
+import { pushNotification } from '@/lib/notify';
 
 export async function PATCH(req, { params }) {
     await connectDB();
@@ -21,6 +22,17 @@ export async function PATCH(req, { params }) {
     );
 
     if (!cart) return NextResponse.json({ error: 'Cart not found' }, { status: 404 });
+
+    if (cart.user) {
+        pushNotification({
+            title: '🎁 You got a personal offer!',
+            message: message || `Enjoy ${discountPercent}% off your cart`,
+            type: 'personal',
+            targetUser: cart.user,
+            link: '/cart',
+        });
+    }
+
     return NextResponse.json({ success: true, cart });
 }
 

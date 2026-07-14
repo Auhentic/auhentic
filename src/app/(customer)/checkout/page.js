@@ -31,6 +31,7 @@ export default function CheckoutPage() {
     const [districtSearch, setDistrictSearch] = useState('');
     const [districtOpen, setDistrictOpen] = useState(false);
     const [itemNotes, setItemNotes] = useState({});
+    const [appliedCoupon, setAppliedCoupon] = useState(null);
 
     const [form, setForm] = useState({
         name: '',
@@ -130,6 +131,35 @@ export default function CheckoutPage() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [router]);
 
+    useEffect(() => {
+        const stored = localStorage.getItem('appliedCoupon');
+        if (!stored) return;
+
+        const parsed = JSON.parse(stored);
+
+        // Re-validate against the server — a stored coupon may have since been
+        // used, deleted, or expired. Don't trust localStorage blindly, or the
+        // UI shows a discount the server will silently ignore at checkout.
+        fetch('/api/coupons/redeem', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: parsed.code }),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.valid) {
+                    setAppliedCoupon(parsed);
+                } else {
+                    localStorage.removeItem('appliedCoupon');
+                    setAppliedCoupon(null);
+                }
+            })
+            .catch(() => {
+                localStorage.removeItem('appliedCoupon');
+                setAppliedCoupon(null);
+            });
+    }, []);
+
     function itemKey(item) {
         return `${item.productId}-${item.variant || 'default'}`;
     }
@@ -139,7 +169,7 @@ export default function CheckoutPage() {
         setError('');
     }
 
-    function getLivePrice(item) {
+    function itemBaseUnitPrice(item) {
         const product = productDetails.find((p) => p._id === (item._id || item.productId));
         if (!product) return item.price;
         let price = item.variant
@@ -154,7 +184,34 @@ export default function CheckoutPage() {
         return price;
     }
 
-    const subtotal = cart.reduce((sum, item) => sum + getLivePrice(item) * item.quantity, 0);
+    // A coupon is good for exactly ONE unit of the FIRST eligible item —
+    // not every matching item, and not every unit of that item.
+    function getCouponTargetKey() {
+        if (!appliedCoupon) return null;
+        for (const item of cart) {
+            const product = productDetails.find((p) => p._id === (item._id || item.productId));
+            if (!product) continue;
+            const matchesProduct = appliedCoupon.scope === 'product' && appliedCoupon.targetProduct === (item._id || item.productId);
+            const matchesCategory = appliedCoupon.scope === 'category' && product.category === appliedCoupon.targetCategory;
+            if (matchesProduct || matchesCategory) return itemKey(item);
+        }
+        return null;
+    }
+    const couponTargetKey = getCouponTargetKey();
+
+    function getLineInfo(item) {
+        const unitPrice = itemBaseUnitPrice(item);
+        let lineTotal = unitPrice * item.quantity;
+        let couponDiscount = 0;
+        if (appliedCoupon && itemKey(item) === couponTargetKey) {
+            const discountedUnit = Math.round(unitPrice * (1 - appliedCoupon.discountPercent / 100));
+            couponDiscount = unitPrice - discountedUnit;
+            lineTotal = discountedUnit + unitPrice * (item.quantity - 1);
+        }
+        return { unitPrice, lineTotal, couponDiscount };
+    }
+
+    const subtotal = cart.reduce((sum, item) => sum + getLineInfo(item).lineTotal, 0);
 
 
     // Compute allowed districts based on product restrictions in cart.
@@ -220,11 +277,12 @@ export default function CheckoutPage() {
                     productId: item._id || item.productId,
                     name: item.name,
                     image: item.image,
-                    price: item.price,
+                    price: getLineInfo(item).unitPrice,
                     quantity: item.quantity,
                     variant: item.variant || null,
                     note: itemNotes[itemKey(item)]?.trim() || '',
                 })),
+                couponCode: appliedCoupon?.code || null,
                 shippingAddress: {
                     street: form.street,
                     city: form.city,
@@ -259,6 +317,7 @@ export default function CheckoutPage() {
             );
             localStorage.setItem('cart', JSON.stringify(remaining));
             localStorage.removeItem('checkoutCart');
+            localStorage.removeItem('appliedCoupon'); // one-time-use — don't let it linger for the next order
             window.dispatchEvent(new Event('cartUpdated'));
             fetch('/api/cart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: remaining }) }).catch(() => { });
 
@@ -489,9 +548,12 @@ export default function CheckoutPage() {
                                             <span className="text-black/40">x{item.quantity}</span>
                                         </span>
                                         <span className="text-black font-medium">
-                                            ৳{(item.price * item.quantity).toLocaleString()}
+                                            ৳{getLineInfo(item).lineTotal.toLocaleString()}
                                         </span>
                                     </div>
+                                    {getLineInfo(item).couponDiscount > 0 && (
+                                        <p className="text-green-600 text-xs -mt-1">🏷️ Coupon: -৳{getLineInfo(item).couponDiscount} on 1 unit</p>
+                                    )}
                                     <input
                                         type="text"
                                         value={itemNotes[itemKey(item)] || ''}

@@ -6,6 +6,7 @@ import Product from '@/models/Product';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import { v2 as cloudinary } from 'cloudinary';
+import { pushNotification } from '@/lib/notify';
 
 // ----------------------------------------
 // GET /api/products/[id]
@@ -102,6 +103,16 @@ export async function PATCH(request, { params }) {
                 { message: 'Product not found' },
                 { status: 404 }
             );
+        }
+
+        // Admin just turned an offer on — let everyone currently browsing know
+        if (body.offer?.isOnOffer) {
+            pushNotification({
+                title: '🔥 New Offer!',
+                message: `${product.name} is now ${product.offer.discountPercent}% off${product.offer.offerLabel ? ` — ${product.offer.offerLabel}` : ''}`,
+                type: 'offer',
+                link: `/products/${product._id}`,
+            });
         }
 
         return NextResponse.json(

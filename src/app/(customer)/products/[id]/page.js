@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-// after: import Image from 'next/image';
 import { isOfferActive } from '@/lib/offerUtils';
 
 export default function ProductDetailPage() {
@@ -240,10 +239,11 @@ export default function ProductDetailPage() {
                                     key={index}
                                     onClick={() => setActiveImage(index)}
                                     className={`relative w-16 h-16 rounded-lg overflow-hidden bg-black/5 border-2 transition
-                    ${activeImage === index
+                                        ${activeImage === index
                                             ? 'border-blue-400'
                                             : 'border-transparent hover:border-black/30'
                                         }`}
+                                    Dino
                                 >
                                     <Image
                                         src={img.url}
@@ -351,7 +351,7 @@ export default function ProductDetailPage() {
                                         key={i}
                                         onClick={() => setSelectedVariant(v)}
                                         className={`px-4 py-2 rounded-full text-sm font-medium border transition
-                        ${selectedVariant?.label === v.label
+                                            ${selectedVariant?.label === v.label
                                                 ? 'bg-black text-white border-black'
                                                 : 'glass border-black/20 text-black hover:border-black/40'
                                             }`}
@@ -393,7 +393,7 @@ export default function ProductDetailPage() {
                         onClick={addToCart}
                         disabled={product.stock === 0}
                         className={`py-3 rounded-xl font-bold text-base transition mt-2
-              ${product.stock === 0
+                            ${product.stock === 0
                                 ? 'bg-black/5 text-black/30 cursor-not-allowed'
                                 : 'glass-btn-primary'
                             }`}
@@ -435,7 +435,7 @@ export default function ProductDetailPage() {
                                     key={star}
                                     onClick={() => setRating(star)}
                                     className={`text-2xl transition
-                    ${star <= rating ? 'text-yellow-400' : 'text-black/20'}`}
+                                        ${star <= rating ? 'text-yellow-400' : 'text-black/20'}`}
                                 >
                                     ★
                                 </button>
@@ -495,28 +495,35 @@ export default function ProductDetailPage() {
                 ) : (
                     <div className="flex flex-col gap-4">
                         {product.reviews.map((review, index) => (
-                            <div key={index} className="glass p-4">
-                                <div className="flex items-center justify-between mb-2">
-                                    <div>
-                                        <p className="text-black font-medium text-sm">
-                                            {review.name}
-                                        </p>
-                                        <div className="flex gap-0.5 mt-0.5">
-                                            {[1, 2, 3, 4, 5].map((star) => (
-                                                <span
-                                                    key={star}
-                                                    className={`text-sm
-                            ${star <= review.rating
-                                                            ? 'text-yellow-400'
-                                                            : 'text-black/20'
-                                                        }`}
-                                                >
-                                                    ★
-                                                </span>
-                                            ))}
+                            <div key={index} className="glass p-4 rounded-2xl">
+                                <div className="flex items-start justify-between mb-2 gap-3">
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                        <div className="relative w-8 h-8 rounded-full overflow-hidden bg-black/10 shrink-0 border border-black/10">
+                                            {review.photo ? (
+                                                <Image src={review.photo} alt={review.name} fill className="object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-black/40 text-xs font-semibold">
+                                                    {review.name?.[0]?.toUpperCase() || '?'}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-black font-medium text-sm truncate">
+                                                {review.name}
+                                            </p>
+                                            <div className="flex gap-0.5 mt-0.5">
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <span
+                                                        key={star}
+                                                        className={`text-sm ${star <= review.rating ? 'text-yellow-400' : 'text-black/20'}`}
+                                                    >
+                                                        ★
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
-                                    <p className="text-black/30 text-xs">
+                                    <p className="text-black/30 text-xs shrink-0">
                                         {new Date(review.createdAt).toLocaleDateString('en-BD', {
                                             year: 'numeric',
                                             month: 'short',
@@ -524,7 +531,7 @@ export default function ProductDetailPage() {
                                         })}
                                     </p>
                                 </div>
-                                <p className="text-black/60 text-sm">{review.comment}</p>
+                                <p className="text-black/60 text-sm text-left mt-1">{review.comment}</p>
                             </div>
                         ))}
                     </div>

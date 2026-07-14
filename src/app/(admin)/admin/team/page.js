@@ -18,19 +18,17 @@ export default function TeamPage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [search, setSearch] = useState('');
-
-    // useEffect(() => {
-    //     fetchUsers();
-    // }, []);
+    const [birthMonth, setBirthMonth] = useState('');
+    const [birthDay, setBirthDay] = useState('');
 
     useEffect(() => {
-        const t = setTimeout(() => fetchUsers(search), 300);
+        const t = setTimeout(() => fetchUsers(search, birthMonth, birthDay), 300);
         return () => clearTimeout(t);
-    }, [search]);
+    }, [search, birthMonth, birthDay]);
 
-    async function fetchUsers(term = '') {
+    async function fetchUsers(term = '', month = '', day = '') {
         try {
-            const res = await fetch(`/api/admin/team?search=${encodeURIComponent(term)}`);
+            const res = await fetch(`/api/admin/team?search=${encodeURIComponent(term)}&birthMonth=${month}&birthDay=${day}`);
             const data = await res.json();
             if (!res.ok) {
                 setError(data.message || 'Failed to load users');
@@ -95,6 +93,28 @@ export default function TeamPage() {
                 className="glass-input rounded-3xl w-full mb-6"
             />
 
+            <div className="flex gap-3 mb-6">
+                <select
+                    value={birthMonth}
+                    onChange={(e) => setBirthMonth(e.target.value)}
+                    className="glass-input rounded-3xl w-full"
+                >
+                    <option value="">All birth months</option>
+                    {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((m, i) => (
+                        <option key={i} value={i + 1}>{m}</option>
+                    ))}
+                </select>
+                <input
+                    type="number"
+                    min="1"
+                    max="31"
+                    value={birthDay}
+                    onChange={(e) => setBirthDay(e.target.value)}
+                    placeholder="Day (1-31)"
+                    className="glass-input rounded-3xl w-full"
+                />
+            </div>
+
             {loading ? (
                 <div className="glass rounded-xl p-8 text-center text-black/50">
                     Loading users...
@@ -119,6 +139,17 @@ export default function TeamPage() {
                                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${ROLE_BADGES[user.role]}`}>
                                         {user.role}
                                     </span>
+                                    {user.isOnline ? (
+                                        <span className="text-xs text-green-600 flex items-center gap-1" title="Online now">
+                                            ✅ Online
+                                        </span>
+                                    ) : (
+                                        <span className="text-xs text-red-500 flex items-center gap-1" title="Offline">
+                                            ❌ {user.lastSeenAt
+                                                ? `Last seen ${new Date(user.lastSeenAt).toLocaleString('en-BD', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+                                                : 'Never seen'}
+                                        </span>
+                                    )}
                                 </div>
                                 <p className="text-black/50 text-xs">{user.email}</p>
                                 {user.phone && (

@@ -34,6 +34,15 @@ export async function GET(request) {
             ];
         }
 
+        const birthMonth = searchParams.get('birthMonth');
+        const birthDay = searchParams.get('birthDay');
+        if (birthMonth || birthDay) {
+            const conditions = [];
+            if (birthMonth) conditions.push({ $eq: [{ $month: '$dateOfBirth' }, Number(birthMonth)] });
+            if (birthDay) conditions.push({ $eq: [{ $dayOfMonth: '$dateOfBirth' }, Number(birthDay)] });
+            filter.$expr = conditions.length > 1 ? { $and: conditions } : conditions[0];
+        }
+
         const users = await User.find(filter).select('-password').sort({ createdAt: -1 });
 
         // Aggregate total time + top-viewed products per user in one pass
@@ -73,10 +82,12 @@ export async function GET(request) {
         ]);
         const productMap = Object.fromEntries(topProducts.map((p) => [p._id.toString(), p.products.slice(0, 3)]));
 
+        const ONLINE_THRESHOLD_MS = 45 * 1000; // presence pings every 25s, so 45s = generous buffer
         const usersWithStats = users.map((u) => ({
             ...u.toObject(),
             totalTimeSeconds: timeMap[u._id.toString()] || 0,
             topProducts: productMap[u._id.toString()] || [],
+            isOnline: u.lastSeenAt ? (Date.now() - new Date(u.lastSeenAt).getTime()) < ONLINE_THRESHOLD_MS : false,
         }));
 
         return NextResponse.json({ users: usersWithStats }, { status: 200 });

@@ -15,7 +15,7 @@ export async function PUT(request) {
             );
         }
 
-        const { name, phone, address, dateOfBirth } = await request.json();
+        const { name, phone, address, dateOfBirth, photo } = await request.json();
 
         if (!name || !phone) {
             return NextResponse.json(
@@ -24,14 +24,17 @@ export async function PUT(request) {
             );
         }
 
+        const updateFields = {
+            name,
+            phone,
+            address,
+            dateOfBirth: dateOfBirth || null,
+        };
+        if (photo) updateFields.photo = photo; // { url, publicId }
+
         const user = await User.findByIdAndUpdate(
             decoded.id,
-            {
-                name,
-                phone,
-                address,
-                dateOfBirth: dateOfBirth || null,
-            },
+            updateFields,
             { new: true, runValidators: true }
         ).select('-password');
 

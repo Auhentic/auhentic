@@ -30,6 +30,8 @@ export default function AdminOrdersPage() {
     const [selectedIds, setSelectedIds] = useState([]);
     const [bulkStatus, setBulkStatus] = useState('confirmed');
     const [bulkLoading, setBulkLoading] = useState(false);
+    const [bulkPaymentStatus, setBulkPaymentStatus] = useState('paid');
+    const [bulkPaymentLoading, setBulkPaymentLoading] = useState(false);
 
     useEffect(() => {
         fetchOrders();
@@ -67,6 +69,7 @@ export default function AdminOrdersPage() {
     }
 
     // Bulk status update
+    // Bulk status update
     async function handleBulkUpdate() {
         if (selectedIds.length === 0) return;
         setBulkLoading(true);
@@ -90,6 +93,33 @@ export default function AdminOrdersPage() {
             setError('Bulk update failed');
         } finally {
             setBulkLoading(false);
+        }
+    }
+
+    // Bulk payment status update
+    async function handleBulkPaymentUpdate() {
+        if (selectedIds.length === 0) return;
+        setBulkPaymentLoading(true);
+        setError('');
+
+        try {
+            await Promise.all(
+                selectedIds.map((id) =>
+                    fetch(`/api/orders/${id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentStatus: bulkPaymentStatus }),
+                    })
+                )
+            );
+            setSuccess(`${selectedIds.length} order${selectedIds.length > 1 ? 's' : ''} payment marked "${bulkPaymentStatus}"`);
+            setSelectedIds([]);
+            fetchOrders();
+            setTimeout(() => setSuccess(''), 3000);
+        } catch {
+            setError('Bulk payment update failed');
+        } finally {
+            setBulkPaymentLoading(false);
         }
     }
 
@@ -155,7 +185,7 @@ export default function AdminOrdersPage() {
                             <span className="text-black font-medium text-sm">
                                 {selectedIds.length} order{selectedIds.length > 1 ? 's' : ''} selected
                             </span>
-                            <div className="flex items-center gap-2 ml-auto">
+                            <div className="flex items-center gap-2 ml-auto flex-wrap">
                                 <span className="text-black/50 text-sm">Set all to:</span>
                                 <select
                                     value={bulkStatus}
@@ -175,6 +205,27 @@ export default function AdminOrdersPage() {
                                 >
                                     {bulkLoading ? 'Updating...' : 'Apply'}
                                 </button>
+
+                                <span className="text-black/50 text-sm ml-2">Payment:</span>
+                                <select
+                                    value={bulkPaymentStatus}
+                                    onChange={(e) => setBulkPaymentStatus(e.target.value)}
+                                    className="glass-input text-sm py-1.5 px-3 w-auto rounded-3xl text-black"
+                                >
+                                    {['pending', 'paid', 'failed'].map((s) => (
+                                        <option key={s} value={s} className="bg-[#bbf7d0] text-black">
+                                            {s.charAt(0).toUpperCase() + s.slice(1)}
+                                        </option>
+                                    ))}
+                                </select>
+                                <button
+                                    onClick={handleBulkPaymentUpdate}
+                                    disabled={bulkPaymentLoading}
+                                    className="glass-btn-primary px-5 py-1.5 w-auto text-sm rounded-3xl text-black"
+                                >
+                                    {bulkPaymentLoading ? 'Updating...' : 'Apply'}
+                                </button>
+
                                 <button
                                     onClick={() => setSelectedIds([])}
                                     className="text-black/40 hover:text-black transition text-sm px-2"

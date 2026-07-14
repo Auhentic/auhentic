@@ -11,6 +11,7 @@ const activitySchema = new mongoose.Schema(
         },
         path: { type: String, default: '' },
         product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: null },
+        productName: { type: String, default: '' }, // snapshot at view-time, survives product deletion/rename
         durationSeconds: { type: Number, default: 0 }, // set on heartbeat/unload events
         meta: { type: Object, default: {} }, // free-form: campaign, source, etc.
     },

@@ -1,6 +1,7 @@
 import { Geist } from 'next/font/google';
 import './globals.css';
 import Tracker from '@/components/Tracker';
+import NotificationListener from '@/components/NotificationListener';
 
 const geist = Geist({ subsets: ['latin'] });
 
@@ -36,6 +37,7 @@ export default function RootLayout({ children }) {
                     {children}
                 </div>
                 <Tracker />
+                <NotificationListener />
             </body>
         </html>
     );

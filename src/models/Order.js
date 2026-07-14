@@ -126,6 +126,11 @@ const orderSchema = new mongoose.Schema(
             type: Number,
             unique: true,
         },
+
+        couponCode: {
+            type: String,
+            default: null,
+        },
     },
     { timestamps: true }
 );

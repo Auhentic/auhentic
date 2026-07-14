@@ -29,11 +29,25 @@ export default function SendCartOffer({ cartId, existingOffer }) {
 
     const isExpired = existingOffer?.expiresAt && new Date(existingOffer.expiresAt).getTime() < Date.now();
 
+    async function removeOffer() {
+        setLoading(true);
+        await fetch(`/api/admin/carts/${cartId}/offer`, { method: 'DELETE' });
+        setLoading(false);
+        router.refresh();
+    }
+
     if (existingOffer?.active && !isExpired) {
         return (
-            <div className="text-xs text-green-700 bg-green-500/10 px-3 py-1.5 rounded-full inline-block">
+            <div className="text-xs text-green-700 bg-green-500/10 px-3 py-1.5 rounded-full inline-flex items-center gap-2">
                 🎁 {existingOffer.discountPercent}% offer sent
                 {existingOffer.expiresAt && ` — ends ${new Date(existingOffer.expiresAt).toLocaleString()}`}
+                <button
+                    onClick={removeOffer}
+                    disabled={loading}
+                    className="text-red-600 hover:text-red-800 font-medium underline"
+                >
+                    {loading ? 'Removing...' : 'Remove'}
+                </button>
             </div>
         );
     }

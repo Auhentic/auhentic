@@ -11,6 +11,10 @@ export default function CartPage() {
     const [selected, setSelected] = useState({});
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [personalOffer, setPersonalOffer] = useState(null);
+    const [couponCode, setCouponCode] = useState('');
+    // const [couponPhone, setCouponPhone] = useState('');
+    const [couponError, setCouponError] = useState('');
+    const [appliedCoupon, setAppliedCoupon] = useState(null);
     const router = useRouter();
 
     useEffect(() => {
@@ -102,6 +106,24 @@ export default function CartPage() {
         window.dispatchEvent(new Event('cartUpdated'));
         // Delete from DB too
         fetch('/api/cart', { method: 'DELETE' }).catch(() => { });
+    }
+
+    async function handleApplyCoupon() {
+        setCouponError('');
+        try {
+            const res = await fetch('/api/coupons/redeem', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: couponCode }),
+            });
+            const data = await res.json();
+            if (!data.valid) return setCouponError(data.message);
+
+            setAppliedCoupon(data);
+            localStorage.setItem('appliedCoupon', JSON.stringify(data));
+        } catch {
+            setCouponError('Something went wrong');
+        }
     }
 
     // A personal (abandoned-cart) offer discounts whatever price is already
@@ -240,6 +262,27 @@ export default function CartPage() {
                         </button>
                     </div>
                 ))}
+            </div>
+
+            {/* Coupon — one box for the whole cart, applies to a single eligible item */}
+            <div className="glass p-4 rounded-3xl mb-4">
+                {!appliedCoupon ? (
+                    <div className="flex flex-col md:flex-row gap-2">
+                        <input
+                            type="text"
+                            value={couponCode}
+                            onChange={(e) => setCouponCode(e.target.value)}
+                            placeholder="Have a coupon code?"
+                            className="glass-inputs rounded-full text-sm flex-1 w-[100%] sm:w-[50%]"
+                        />
+                        <button onClick={handleApplyCoupon} className="glass-btns px-4 py-2 text-sm w-[100%] sm:w-[50%] ">
+                            Apply Coupon
+                        </button>
+                    </div>
+                ) : (
+                    <p className="text-green-600 text-sm">✅ Coupon {appliedCoupon.code} applied — {appliedCoupon.discountPercent}% off will be applied to 1 unit of the eligible item at checkout</p>
+                )}
+                {couponError && <p className="text-red-600 text-xs mt-1">{couponError}</p>}
             </div>
 
             {/* Cart Summary */}

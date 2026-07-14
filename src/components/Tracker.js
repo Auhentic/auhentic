@@ -7,6 +7,24 @@ export default function Tracker() {
     const pathname = usePathname();
     const enterTimeRef = useRef(Date.now());
 
+    // "Currently online" presence — separate from page/product tracking.
+    // Pings every 25s while the tab is open so admin/team can show a
+    // live green/red status without waiting for a page navigation.
+    useEffect(() => {
+        function ping() {
+            if (document.visibilityState === 'visible') {
+                fetch('/api/presence', { method: 'POST' }).catch(() => { });
+            }
+        }
+        ping();
+        const interval = setInterval(ping, 25000);
+        document.addEventListener('visibilitychange', ping);
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener('visibilitychange', ping);
+        };
+    }, []);
+
     useEffect(() => {
         getVisitorId(); // ensures cookie exists on first load
 

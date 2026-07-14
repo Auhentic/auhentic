@@ -3,11 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function ProfilePage() {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [photo, setPhoto] = useState(null); // { url, publicId }
+    const [photoUploading, setPhotoUploading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [dobType, setDobType] = useState('text');
@@ -47,6 +50,7 @@ export default function ProfilePage() {
                     postalCode: u.address?.postalCode || '',
                     dateOfBirth: u.dateOfBirth || '',
                 });
+                setPhoto(u.photo?.url ? u.photo : null);
             } catch {
                 router.push('/auth/login');
             } finally {
@@ -92,6 +96,29 @@ export default function ProfilePage() {
         }
     }
 
+    async function handlePhotoChange(e) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setPhotoUploading(true);
+        setError('');
+        try {
+            const fd = new FormData();
+            fd.append('image', file);
+            const res = await fetch('/api/upload/public', { method: 'POST', body: fd });
+            const data = await res.json();
+            if (!res.ok) {
+                setError(data.message || 'Photo upload failed');
+                return;
+            }
+            setPhoto({ url: data.url, publicId: data.publicId });
+        } catch {
+            setError('Photo upload failed');
+        } finally {
+            setPhotoUploading(false);
+        }
+    }
+
     async function handleSave() {
         setError('');
         setSuccess('');
@@ -116,6 +143,7 @@ export default function ProfilePage() {
                         postalCode: form.postalCode,         // ← was postalCode
                     },
                     dateOfBirth: form.dateOfBirth,
+                    photo,
                 }),
             });
 
@@ -161,6 +189,30 @@ export default function ProfilePage() {
             {/* Personal Info */}
             <div className="glass rounded-3xl p-6 mb-4">
                 <h2 className="text-black font-semibold mb-4">Personal Information</h2>
+
+                {/* Profile Photo */}
+                <div className="flex items-center gap-4 mb-6">
+                    <div className="relative w-16 h-16 rounded-full overflow-hidden bg-black/10 shrink-0 border border-black/10">
+                        {photo?.url ? (
+                            <Image src={photo.url} alt="Profile photo" fill className="object-cover" />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center text-black/30 text-xs">
+                                No photo
+                            </div>
+                        )}
+                    </div>
+                    <label className="glass-btn px-4 py-2 w-auto text-sm cursor-pointer">
+                        {photoUploading ? 'Uploading...' : 'Change Photo'}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handlePhotoChange}
+                            disabled={photoUploading}
+                            className="hidden"
+                        />
+                    </label>
+                </div>
+
                 <div className="flex flex-col gap-4">
 
                     <div>

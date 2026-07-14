@@ -15,7 +15,7 @@ export async function GET() {
         // Most-viewed products among guests (no account) only
         const topGuestProducts = await Activity.aggregate([
             { $match: { user: null, type: 'product_view' } },
-            { $group: { _id: '$product', views: { $sum: 1 }, lastViewedAt: { $max: '$createdAt' } } },
+            { $group: { _id: '$product', views: { $sum: 1 }, lastViewedAt: { $max: '$createdAt' }, lastProductName: { $last: '$productName' } } },
             { $sort: { views: -1 } },
             { $limit: 10 },
             {
@@ -30,7 +30,7 @@ export async function GET() {
                 $project: {
                     views: 1,
                     lastViewedAt: 1,
-                    name: { $arrayElemAt: ['$productInfo.name', 0] },
+                    name: { $ifNull: [{ $arrayElemAt: ['$productInfo.name', 0] }, '$lastProductName'] },
                 },
             },
         ]);

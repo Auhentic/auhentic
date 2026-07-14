@@ -68,6 +68,10 @@ const userSchema = new mongoose.Schema(
                 default: ''
             },
         },
+        lastSeenAt: {
+            type: Date,
+            default: null,
+        },
     },
     { timestamps: true }
 );

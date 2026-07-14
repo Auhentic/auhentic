@@ -7,6 +7,8 @@ import { getAuthUser } from '@/lib/auth';
 import { isOfferActive } from '@/lib/offerUtils';
 import Settings from '@/models/Settings';
 import Counter from '@/models/Counter';
+import Coupon from '@/models/Coupon';
+import User from '@/models/User';
 
 // GET all orders
 // Admin → sees ALL orders
@@ -46,6 +48,7 @@ export async function GET(request) {
 
 // POST place a new order
 // Works for both logged-in users AND guests (COD)
+
 export async function POST(request) {
     try {
         await connectDB();
@@ -104,6 +107,26 @@ export async function POST(request) {
         // item-level delivery restriction for the chosen district.
         let restrictedCharge = null;
 
+        let coupon = null;
+        if (body.couponCode) {
+            coupon = await Coupon.findOne({ code: body.couponCode.trim().toUpperCase(), active: true, usedInOrder: null });
+            if (coupon) {
+                // getAuthUser() only decodes the JWT (id + role) — it does NOT
+                // carry phone/email, so we need the real profile to check identity.
+                const dbUser = user ? await User.findById(user.id).select('phone email') : null;
+                const orderPhone = dbUser?.phone || shippingAddress.phone;
+                const orderEmail = (dbUser?.email || guestInfo?.email)?.toLowerCase();
+                const matches =
+                    (coupon.targetPhone && coupon.targetPhone === orderPhone) ||
+                    (coupon.targetEmail && coupon.targetEmail === orderEmail);
+                if (!matches) coupon = null;
+                if (coupon && coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) coupon = null;
+            }
+        }
+        // A coupon is good for exactly ONE unit of ONE eligible item —
+        // not every matching item, and not every unit of that item.
+        let couponConsumed = false;
+
         for (const item of items) {
             const product = await Product.findById(item.productId);
 
@@ -150,6 +173,19 @@ export async function POST(request) {
                 price = Math.round(price * (1 - personalOffer.discountPercent / 100));
             }
 
+            // Coupon — applies to exactly ONE unit of the first eligible
+            // item, no matter how many matching items/units are in the cart.
+            let lineTotal = price * item.quantity;
+            if (coupon && !couponConsumed) {
+                const matchesProduct = coupon.scope === 'product' && coupon.targetProduct?.toString() === product._id.toString();
+                const matchesCategory = coupon.scope === 'category' && product.category === coupon.targetCategory;
+                if (matchesProduct || matchesCategory) {
+                    const discountedUnitPrice = Math.round(price * (1 - coupon.discountPercent / 100));
+                    lineTotal = discountedUnitPrice + price * (item.quantity - 1);
+                    couponConsumed = true;
+                }
+            }
+
             // Snapshot price/name/image at time of order!
             orderItems.push({
                 productId: product._id,
@@ -161,7 +197,7 @@ export async function POST(request) {
                 note: typeof item.note === 'string' ? item.note.trim().slice(0, 300) : '',
             });
 
-            subtotal += price * item.quantity;
+            subtotal += lineTotal;
         }
 
         // Shipping cost logic — item-level delivery restriction charge wins
@@ -198,7 +234,13 @@ export async function POST(request) {
             total,
             note,
             orderNumber,
+            couponCode: coupon && couponConsumed ? coupon.code : null,
         });
+
+        // Burn the coupon now that we have a real order id — one-time use only.
+        if (coupon && couponConsumed) {
+            await Coupon.findByIdAndDelete(coupon._id);
+        }
 
         // Reduce stock for each product
         for (const item of items) {

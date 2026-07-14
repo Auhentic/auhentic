@@ -96,6 +96,25 @@ export default async function HomePage() {
                 </div>
 
                 {/* Ongoing Offer Row — 20% */}
+                {/* {offerProducts.length > 0 && (
+                    <div className="w-full lg:flex-[2_1_0%] lg:min-h-0">
+                        <ProductScrollRow
+                            title="Ongoing Offer Product"
+                            icon="🏷️"
+                            seeAllHref="/products?offer=true"
+                            seeAllLabel="See All Offer"
+                            products={offerProducts}
+                        />
+                    </div>
+                )} */}
+            </section>
+
+            {/*
+              BELOW HERO — Category rows, each scrollable.
+              CategorySection is a client component so it can handle
+              the selectable category chip filter at the top.
+            */}
+            <section className="px-4 pb-16 pt-6 flex flex-col gap-8">
                 {offerProducts.length > 0 && (
                     <div className="w-full lg:flex-[2_1_0%] lg:min-h-0">
                         <ProductScrollRow
@@ -107,14 +126,6 @@ export default async function HomePage() {
                         />
                     </div>
                 )}
-            </section>
-
-            {/*
-              BELOW HERO — Category rows, each scrollable.
-              CategorySection is a client component so it can handle
-              the selectable category chip filter at the top.
-            */}
-            <section className="px-4 pb-16 pt-6 flex flex-col gap-8">
                 <CategorySection categoryRows={categoryRows} />
             </section>
 

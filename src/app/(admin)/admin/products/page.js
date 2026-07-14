@@ -32,6 +32,9 @@ export default function AdminProductsPage() {
     const [existingImages, setExistingImages] = useState([]);
     const fileRef = useRef();
     const [search, setSearch] = useState('');
+    const [stockFilter, setStockFilter] = useState('all'); // all | low | high
+    const [categoryFilter, setCategoryFilter] = useState('all');
+    const [topSellingOnly, setTopSellingOnly] = useState(false);
 
     const emptyForm = {
         name: '',
@@ -48,6 +51,7 @@ export default function AdminProductsPage() {
         allowedDistricts: [],
         offer: { expiresAt: '' },
     };
+    const categories = ['all', ...new Set(products.map((p) => p.category).filter(Boolean))];
 
     const [form, setForm] = useState(emptyForm);
     const [variantLabel, setVariantLabel] = useState('');
@@ -292,6 +296,36 @@ export default function AdminProductsPage() {
                 <button onClick={openAddForm} className="glass-btn-primary px-6 py-2 w-auto text-sm">
                     + Add Product
                 </button>
+            </div>
+
+            <div className="flex flex-wrap gap-3 mb-4">
+                <select
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    className="glass-input rounded-3xl w-auto text-sm"
+                >
+                    {categories.map((c) => (
+                        <option key={c} value={c}>{c === 'all' ? 'All Categories' : c}</option>
+                    ))}
+                </select>
+                <select
+                    value={stockFilter}
+                    onChange={(e) => setStockFilter(e.target.value)}
+                    className="glass-input rounded-3xl w-auto text-sm"
+                >
+                    <option value="all">All Stock Levels</option>
+                    <option value="low">Low Stock (≤30)</option>
+                    <option value="high">High Stock ({'>'}30)</option>
+                </select>
+                <label className="flex items-center gap-2 glass-input rounded-3xl w-auto text-sm px-4 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={topSellingOnly}
+                        onChange={(e) => setTopSellingOnly(e.target.checked)}
+                        className="accent-[#3E2723]"
+                    />
+                    Top Selling Only
+                </label>
             </div>
 
             {error && (
@@ -675,6 +709,13 @@ export default function AdminProductsPage() {
                 <div className="flex flex-col gap-4">
                     {products
                         .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+                        .filter((p) => categoryFilter === 'all' || p.category === categoryFilter)
+                        .filter((p) => {
+                            if (stockFilter === 'low') return p.stock <= 30;
+                            if (stockFilter === 'high') return p.stock > 30;
+                            return true;
+                        })
+                        .filter((p) => !topSellingOnly || p.isTopSelling)
                         .sort((a, b) => a.name.localeCompare(b.name))
                         .map((product) => (
                             <div

@@ -4,6 +4,7 @@ const reviewSchema = new mongoose.Schema(
     {
         user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
         name: { type: String, required: true },
+        photo: { type: String, default: '' }, // snapshot of reviewer's profile photo URL
         rating: { type: Number, required: true, min: 1, max: 5 },
         comment: { type: String, required: true },
     },

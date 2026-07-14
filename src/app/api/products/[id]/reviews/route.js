@@ -46,13 +46,14 @@ export async function POST(request, { params }) {
         }
 
         // const User = await import('@/models/User');
-        // const dbUser = await User.default.findById(user.id).select('name');
-        const dbUser = await User.findById(user.id).select('name');
+        // const dbUser = await User .default.findById(user.id).select('name');
+        const dbUser = await User.findById(user.id).select('name photo');
 
         // Add review
         product.reviews.push({
             user: user.id,
             name: dbUser?.name || 'Customer', // ← get real name from DB
+            photo: dbUser?.photo?.url || '',
             rating: Number(rating),
             comment
         });
