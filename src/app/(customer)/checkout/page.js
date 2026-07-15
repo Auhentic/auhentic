@@ -4,19 +4,19 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { isOfferActive } from '@/lib/offerUtils';
 
-const BD_DISTRICTS = [
-    'Bagerhat', 'Bandarban', 'Barguna', 'Barishal', 'Bhola', 'Bogura', 'Brahmanbaria',
-    'Chandpur', 'Chapai Nawabganj', 'Chattogram', 'Chuadanga', "Cox's Bazar", 'Cumilla',
-    'Dhaka', 'Dinajpur', 'Faridpur', 'Feni', 'Gaibandha', 'Gazipur', 'Gopalganj',
-    'Habiganj', 'Jamalpur', 'Jashore', 'Jhalokati', 'Jhenaidah', 'Joypurhat',
-    'Khagrachhari', 'Khulna', 'Kishoreganj', 'Kurigram', 'Kushtia', 'Lakshmipur',
-    'Lalmonirhat', 'Madaripur', 'Magura', 'Manikganj', 'Meherpur', 'Moulvibazar',
-    'Munshiganj', 'Mymensingh', 'Naogaon', 'Narail', 'Narayanganj', 'Narsingdi',
-    'Natore', 'Netrokona', 'Nilphamari', 'Noakhali', 'Pabna', 'Panchagarh',
-    'Patuakhali', 'Pirojpur', 'Rajbari', 'Rajshahi', 'Rangamati', 'Rangpur',
-    'Satkhira', 'Shariatpur', 'Sherpur', 'Sirajganj', 'Sunamganj', 'Sylhet',
-    'Tangail', 'Thakurgaon',
-];
+// const BD_DISTRICTS = [
+//     'Bagerhat', 'Bandarban', 'Barguna', 'Barishal', 'Bhola', 'Bogura', 'Brahmanbaria',
+//     'Chandpur', 'Chapai Nawabganj', 'Chattogram', 'Chuadanga', "Cox's Bazar", 'Cumilla',
+//     'Dhaka', 'Dinajpur', 'Faridpur', 'Feni', 'Gaibandha', 'Gazipur', 'Gopalganj',
+//     'Habiganj', 'Jamalpur', 'Jashore', 'Jhalokati', 'Jhenaidah', 'Joypurhat',
+//     'Khagrachhari', 'Khulna', 'Kishoreganj', 'Kurigram', 'Kushtia', 'Lakshmipur',
+//     'Lalmonirhat', 'Madaripur', 'Magura', 'Manikganj', 'Meherpur', 'Moulvibazar',
+//     'Munshiganj', 'Mymensingh', 'Naogaon', 'Narail', 'Narayanganj', 'Narsingdi',
+//     'Natore', 'Netrokona', 'Nilphamari', 'Noakhali', 'Pabna', 'Panchagarh',
+//     'Patuakhali', 'Pirojpur', 'Rajbari', 'Rajshahi', 'Rangamati', 'Rangpur',
+//     'Satkhira', 'Shariatpur', 'Sherpur', 'Sirajganj', 'Sunamganj', 'Sylhet',
+//     'Tangail', 'Thakurgaon',
+// ];
 
 export default function CheckoutPage() {
     const router = useRouter();
@@ -52,6 +52,16 @@ export default function CheckoutPage() {
             return;
         }
         setCart(stored);
+        
+        if (typeof window !== 'undefined' && window.fbq) {
+            window.fbq('track', 'InitiateCheckout', {
+                content_ids: stored.map((item) => item.productId),
+                content_type: 'product',
+                num_items: stored.reduce((sum, item) => sum + item.quantity, 0),
+                value: stored.reduce((sum, item) => sum + item.price * item.quantity, 0),
+                currency: 'BDT',
+            });
+        }
 
         // load user if logged in
         async function fetchUser() {
@@ -193,7 +203,8 @@ export default function CheckoutPage() {
             if (!product) continue;
             const matchesProduct = appliedCoupon.scope === 'product' && appliedCoupon.targetProduct === (item._id || item.productId);
             const matchesCategory = appliedCoupon.scope === 'category' && product.category === appliedCoupon.targetCategory;
-            if (matchesProduct || matchesCategory) return itemKey(item);
+            const matchesAll = appliedCoupon.scope === 'all';
+            if (matchesProduct || matchesCategory || matchesAll) return itemKey(item);
         }
         return null;
     }
@@ -441,7 +452,7 @@ export default function CheckoutPage() {
                                                         ⚠️ Delivery restricted to {allowedDistrictsForCart.length} district{allowedDistrictsForCart.length !== 1 ? 's' : ''} for items in your cart
                                                     </p>
                                                 )}
-                                                {(allowedDistrictsForCart || BD_DISTRICTS)
+                                                {(allowedDistrictsForCart || [])
                                                     .filter((d) => d.toLowerCase().includes(districtSearch.toLowerCase()))
                                                     .map((d) => {
                                                         const charge = getDistrictCharge(d);
@@ -464,8 +475,10 @@ export default function CheckoutPage() {
                                                         );
                                                     })
                                                 }
-                                                {(allowedDistrictsForCart || BD_DISTRICTS).filter((d) => d.toLowerCase().includes(districtSearch.toLowerCase())).length === 0 && (
-                                                    <p className="text-center text-black/30 text-sm py-4">No district found</p>
+                                                {(allowedDistrictsForCart || []).filter((d) => d.toLowerCase().includes(districtSearch.toLowerCase())).length === 0 && (
+                                                    <p className="text-center text-black/30 text-sm py-4">
+                                                        {allowedDistrictsForCart ? 'No district found' : 'This product has no delivery city set yet.'}
+                                                    </p>
                                                 )}
                                             </div>
                                         </div>

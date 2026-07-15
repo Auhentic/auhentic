@@ -38,6 +38,16 @@ export default function ProductCard({ product }) {
 
         localStorage.setItem('cart', JSON.stringify(cart));
         window.dispatchEvent(new Event('cartUpdated'));
+
+        if (typeof window !== 'undefined' && window.fbq) {
+            window.fbq('track', 'AddToCart', {
+                content_ids: [product._id],
+                content_type: 'product',
+                value: cartPrice,
+                currency: 'BDT',
+            });
+        }
+        
         // temporary — replace with toast later
         alert(`${product.name} added to cart!`);
     }
@@ -142,7 +152,7 @@ export default function ProductCard({ product }) {
             {/* Delivery Restriction Notice */}
             {product.deliveryRestriction?.enabled && product.deliveryRestriction?.allowedDistricts?.length > 0 && (
                 <p className="text-black/50 text-xs line-clamp-1">
-                    🚚 Delivers only to: {product.deliveryRestriction.allowedDistricts.map((d) => d.district).join(', ')}
+                    🚚 Delivered only on shown city: {product.deliveryRestriction.allowedDistricts.map((d) => d.district).join(', ')}
                 </p>
             )}
 

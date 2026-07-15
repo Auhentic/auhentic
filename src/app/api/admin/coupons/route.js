@@ -31,14 +31,14 @@ export async function POST(request) {
         }
         await connectDB();
 
-        const { code, targetPhone, targetEmail, scope, targetProduct, targetCategory, discountPercent, expiresAt } =
+        const { code, targetPhone, targetEmail, targetAll, scope, targetProduct, targetCategory, discountPercent, expiresAt } =
             await request.json();
 
         if (!code || !scope || !discountPercent) {
             return NextResponse.json({ message: 'Code, scope, and discount are required' }, { status: 400 });
         }
-        if (!targetPhone && !targetEmail) {
-            return NextResponse.json({ message: 'A target phone or email is required' }, { status: 400 });
+        if (!targetAll && !targetPhone && !targetEmail) {
+            return NextResponse.json({ message: 'Select a customer, or choose "All Customers"' }, { status: 400 });
         }
         if (scope === 'product' && !targetProduct) {
             return NextResponse.json({ message: 'Select a product for product-scoped coupons' }, { status: 400 });
@@ -49,8 +49,9 @@ export async function POST(request) {
 
         const coupon = await Coupon.create({
             code: code.trim().toUpperCase(),
-            targetPhone: targetPhone?.trim() || null,
-            targetEmail: targetEmail?.trim().toLowerCase() || null,
+            targetPhone: targetAll ? null : (targetPhone?.trim() || null),
+            targetEmail: targetAll ? null : (targetEmail?.trim().toLowerCase() || null),
+            targetAll: !!targetAll,
             scope,
             targetProduct: scope === 'product' ? targetProduct : null,
             targetCategory: scope === 'category' ? targetCategory : null,
@@ -60,7 +61,9 @@ export async function POST(request) {
         });
 
         // Notify the matched customer live, if they have an account
-        const matchedUser = await User.findOne({
+        // Notify the matched customer live, if they have an account
+        // (skipped for "all customers" coupons — there's no single target)
+        const matchedUser = !targetAll && await User.findOne({
             $or: [
                 ...(targetPhone ? [{ phone: targetPhone.trim() }] : []),
                 ...(targetEmail ? [{ email: targetEmail.trim().toLowerCase() }] : []),

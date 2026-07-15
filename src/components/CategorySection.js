@@ -20,12 +20,12 @@ export default function CategorySection({ categoryRows }) {
     return (
         <div>
             {/* Selectable Category Chips */}
-            <div className="flex gap-2 flex-wrap mb-6">
+            <div className="flex gap-2 flex-nowrap overflow-x-auto scrollbar-hide mb-6 pb-1">
                 {categories.map((cat) => (
                     <button
                         key={cat}
                         onClick={() => setSelected(cat)}
-                        className={`px-4 py-1.5 rounded-full text-sm font-medium transition
+                        className={`px-4 py-1.5 rounded-full text-sm font-medium transition flex-shrink-0
                             ${selected === cat
                                 ? 'bg-white text-[#3E2723] shadow'
                                 : 'bg-white/40 text-[#3E2723] hover:bg-white/60'

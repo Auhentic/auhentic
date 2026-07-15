@@ -74,6 +74,42 @@ export default function ProductScrollRow({ title, icon, seeAllHref, seeAllLabel,
         }
     }
 
+    // 👇 Thumb-swipe support, gallery style
+    const touchStartXRef = useRef(0);
+    const isDraggingRef = useRef(false);
+    const SWIPE_THRESHOLD = 40; // px
+
+    function pauseAutoplay() {
+        if (timerRef.current) clearInterval(timerRef.current);
+    }
+
+    function resumeAutoplay() {
+        if (!shouldLoop) return;
+        pauseAutoplay();
+        timerRef.current = setInterval(() => {
+            setStartIndex((prev) => prev + 1);
+        }, 3500);
+    }
+
+    function handleTouchStart(e) {
+        if (!shouldLoop) return;
+        touchStartXRef.current = e.touches[0].clientX;
+        isDraggingRef.current = true;
+        pauseAutoplay();
+    }
+
+    function handleTouchEnd(e) {
+        if (!isDraggingRef.current) return;
+        isDraggingRef.current = false;
+        const deltaX = touchStartXRef.current - e.changedTouches[0].clientX;
+        if (deltaX > SWIPE_THRESHOLD) {
+            scrollByAmount('full');   // swiped left → next item
+        } else if (deltaX < -SWIPE_THRESHOLD) {
+            scrollByAmount('-full');  // swiped right → previous item
+        }
+        resumeAutoplay();
+    }
+
     if (!products || total === 0) return null;
 
     return (
@@ -120,7 +156,7 @@ export default function ProductScrollRow({ title, icon, seeAllHref, seeAllLabel,
             {/* Viewport Window */}
             <div className="w-full h-auto overflow-hidden">
                 {/* Conveyor Belt Track */}
-                <div
+                {/* <div
                     onTransitionEnd={handleTransitionEnd}
                     className="flex gap-3 h-auto"
                     style={{
@@ -129,6 +165,21 @@ export default function ProductScrollRow({ title, icon, seeAllHref, seeAllLabel,
                             ? 'none'
                             : `translateX(calc(-${startIndex} * (100% + 12px) / var(--items-per-view)))`,
                         transition: isTransitioning ? 'transform 800ms ease-in-out' : 'none',
+                    }}
+                > */}
+
+                <div
+                    onTransitionEnd={handleTransitionEnd}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={handleTouchEnd}
+                    className="flex gap-3 h-auto"
+                    style={{
+                        // FIXED: Corrected translation math to move exactly 1 item width + 1 gap step
+                        transform: (total === 1 || !shouldLoop)
+                            ? 'none'
+                            : `translateX(calc(-${startIndex} * (100% + 12px) / var(--items-per-view)))`,
+                        transition: isTransitioning ? 'transform 800ms ease-in-out' : 'none',
+                        touchAction: 'pan-y', // let vertical page-scroll through, but capture horizontal swipe ourselves
                     }}
                 >
                     {extendedProducts.map((product, i) => {

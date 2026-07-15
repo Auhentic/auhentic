@@ -192,10 +192,12 @@ export async function GET(request) {
         const category = searchParams.get('category') || null;
         const offerOnly = searchParams.get('offer') === 'true';
         const topSellingOnly = searchParams.get('topSelling') === 'true';
+        const search = (searchParams.get('search') || '').trim();
         const sort = searchParams.get('sort') || 'createdAt';
         const order = searchParams.get('order') === 'asc' ? 1 : -1;
         const page = parseInt(searchParams.get('page')) || 1;
-        const limit = parseInt(searchParams.get('limit')) || 12;
+        // searching should not be squeezed into the default 12-item page
+        const limit = parseInt(searchParams.get('limit')) || (search ? 100 : 12);
         const skip = (page - 1) * limit;
 
         let sortOption = { createdAt: -1 }; // default newest first
@@ -214,6 +216,12 @@ export async function GET(request) {
         if (category) filter.category = category;
         if (offerOnly) filter['offer.isOnOffer'] = true;
         if (topSellingOnly) filter.isTopSelling = true;
+        if (search) {
+            filter.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } },
+            ];
+        }
 
         const [products, total] = await Promise.all(
             [

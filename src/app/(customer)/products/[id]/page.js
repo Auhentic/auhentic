@@ -144,6 +144,16 @@ export default function ProductDetailPage() {
 
         localStorage.setItem('cart', JSON.stringify(cart));
         window.dispatchEvent(new Event('cartUpdated'));
+
+        if (typeof window !== 'undefined' && window.fbq) {
+            window.fbq('track', 'AddToCart', {
+                content_ids: [product._id],
+                content_type: 'product',
+                value: cartPrice * quantity,
+                currency: 'BDT',
+            });
+        }
+        
         router.push('/cart');
     }
 
@@ -332,7 +342,7 @@ export default function ProductDetailPage() {
                     {/* Delivery Restriction Notice */}
                     {product.deliveryRestriction?.enabled && product.deliveryRestriction?.allowedDistricts?.length > 0 && (
                         <p className="text-black/60 text-sm">
-                            🚚 Delivers only to: {product.deliveryRestriction.allowedDistricts.map((d) => d.district).join(', ')}
+                            🚚 Delivered only on shown city: {product.deliveryRestriction.allowedDistricts.map((d) => d.district).join(', ')}
                         </p>
                     )}
 
@@ -389,17 +399,51 @@ export default function ProductDetailPage() {
                     )}
 
                     {/* Add to Cart */}
-                    <button
-                        onClick={addToCart}
-                        disabled={product.stock === 0}
-                        className={`py-3 rounded-xl font-bold text-base transition mt-2
-                            ${product.stock === 0
-                                ? 'bg-black/5 text-black/30 cursor-not-allowed'
-                                : 'glass-btn-primary'
-                            }`}
-                    >
-                        {product.stock === 0 ? 'Out of Stock' : '🛒 Add to Cart'}
-                    </button>
+                    {/* Order Options — 2x2 grid: Call / WhatsApp / Facebook / Add to Cart */}
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                        {settings?.phone && (
+
+                            <a href={`tel:${settings.phone}`}
+                                className="glass-btn py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-1.5"
+                            >
+                                📞 Order by Call
+                            </a>
+                        )}
+
+                        {settings?.whatsapp && (
+
+                            <a href={`https://wa.me/88${settings.whatsapp}?text=${encodeURIComponent(`Hi, I want to order: ${product.name}`)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="glass-btn py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-1.5"
+                            >
+                                💬 Order by WhatsApp
+                            </a>
+                        )}
+
+                        {settings?.facebook && (
+
+                            <a href={settings.facebook}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="glass-btn py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-1.5"
+                            >
+                                📘 Order via Facebook
+                            </a>
+                        )}
+
+                        <button
+                            onClick={addToCart}
+                            disabled={product.stock === 0}
+                            className={`py-3 rounded-xl font-bold text-sm transition
+            ${product.stock === 0
+                                    ? 'bg-black/5 text-black/30 cursor-not-allowed'
+                                    : 'glass-btn-primary'
+                                }`}
+                        >
+                            {product.stock === 0 ? 'Out of Stock' : '🛒 Add to Cart'}
+                        </button>
+                    </div>
 
                     {/* Free Shipping Note */}
                     {typeof settings?.freeDeliveryAmount === 'number' && settings.freeDeliveryAmount > 0 && (
@@ -408,10 +452,10 @@ export default function ProductDetailPage() {
                         </p>
                     )}
                 </div>
-            </div>
+            </div >
 
             {/* Reviews Section */}
-            <div className="glass p-6 rounded-3xl">
+            < div className="glass p-6 rounded-3xl" >
                 <h2 className="text-black font-bold text-xl mb-6">
                     Reviews{' '}
                     {product.reviews?.length > 0 && (
@@ -422,148 +466,158 @@ export default function ProductDetailPage() {
                 </h2>
 
                 {/* Write Review — only for logged in + delivered */}
-                {user && hasDelivered && (
-                    <div className="glass p-4 mb-6 rounded-3xl">
-                        <h3 className="text-black font-semibold mb-3 text-sm">
-                            Write a Review
-                        </h3>
+                {
+                    user && hasDelivered && (
+                        <div className="glass p-4 mb-6 rounded-3xl">
+                            <h3 className="text-black font-semibold mb-3 text-sm">
+                                Write a Review
+                            </h3>
 
-                        {/* Star Rating */}
-                        <div className="flex gap-1 mb-3">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                    key={star}
-                                    onClick={() => setRating(star)}
-                                    className={`text-2xl transition
+                            {/* Star Rating */}
+                            <div className="flex gap-1 mb-3">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <button
+                                        key={star}
+                                        onClick={() => setRating(star)}
+                                        className={`text-2xl transition
                                         ${star <= rating ? 'text-yellow-400' : 'text-black/20'}`}
-                                >
-                                    ★
-                                </button>
-                            ))}
+                                    >
+                                        ★
+                                    </button>
+                                ))}
+                            </div>
+
+                            <textarea
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                placeholder="Share your experience with this product..."
+                                rows={3}
+                                className="glass-input resize-none mb-3"
+                            />
+
+                            {reviewError && (
+                                <p className="text-[#3E2723] text-xs mb-2">{reviewError}</p>
+                            )}
+                            {reviewSuccess && (
+                                <p className="text-[#3E2723] text-xs mb-2">{reviewSuccess}</p>
+                            )}
+
+                            <button
+                                onClick={handleReviewSubmit}
+                                disabled={reviewLoading}
+                                className="glass-btn-primary px-6 py-2 w-auto text-sm"
+                            >
+                                {reviewLoading ? 'Submitting...' : 'Submit Review'}
+                            </button>
                         </div>
-
-                        <textarea
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            placeholder="Share your experience with this product..."
-                            rows={3}
-                            className="glass-input resize-none mb-3"
-                        />
-
-                        {reviewError && (
-                            <p className="text-[#3E2723] text-xs mb-2">{reviewError}</p>
-                        )}
-                        {reviewSuccess && (
-                            <p className="text-[#3E2723] text-xs mb-2">{reviewSuccess}</p>
-                        )}
-
-                        <button
-                            onClick={handleReviewSubmit}
-                            disabled={reviewLoading}
-                            className="glass-btn-primary px-6 py-2 w-auto text-sm"
-                        >
-                            {reviewLoading ? 'Submitting...' : 'Submit Review'}
-                        </button>
-                    </div>
-                )}
+                    )
+                }
 
                 {/* Not delivered yet message */}
-                {user && !hasDelivered && (
-                    <div className="glass p-4 mb-6 text-black/40 text-sm text-center rounded-3xl">
-                        You can write a review after your order is delivered
-                    </div>
-                )}
+                {
+                    user && !hasDelivered && (
+                        <div className="glass p-4 mb-6 text-black/40 text-sm text-center rounded-3xl">
+                            You can write a review after your order is delivered
+                        </div>
+                    )
+                }
 
                 {/* Login to review */}
-                {!user && (
-                    <div className="glass p-4 mb-6 text-center">
-                        <p className="text-black/40 text-sm">
-                            Please{' '}
-                            <a href="/auth/login" className="text-[#c8860a] hover:underline">
-                                login
-                            </a>{' '}
-                            to write a review
-                        </p>
-                    </div>
-                )}
+                {
+                    !user && (
+                        <div className="glass p-4 mb-6 text-center">
+                            <p className="text-black/40 text-sm">
+                                Please{' '}
+                                <a href="/auth/login" className="text-[#c8860a] hover:underline">
+                                    login
+                                </a>{' '}
+                                to write a review
+                            </p>
+                        </div>
+                    )
+                }
 
                 {/* Reviews List */}
-                {product.reviews?.length === 0 ? (
-                    <p className="text-black/30 text-sm text-center py-4">
-                        No reviews yet. Be the first to review!
-                    </p>
-                ) : (
-                    <div className="flex flex-col gap-4">
-                        {product.reviews.map((review, index) => (
-                            <div key={index} className="glass p-4 rounded-2xl">
-                                <div className="flex items-start justify-between mb-2 gap-3">
-                                    <div className="flex items-center gap-2.5 min-w-0">
-                                        <div className="relative w-8 h-8 rounded-full overflow-hidden bg-black/10 shrink-0 border border-black/10">
-                                            {review.photo ? (
-                                                <Image src={review.photo} alt={review.name} fill className="object-cover" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-black/40 text-xs font-semibold">
-                                                    {review.name?.[0]?.toUpperCase() || '?'}
+                {
+                    product.reviews?.length === 0 ? (
+                        <p className="text-black/30 text-sm text-center py-4">
+                            No reviews yet. Be the first to review!
+                        </p>
+                    ) : (
+                        <div className="flex flex-col gap-4">
+                            {product.reviews.map((review, index) => (
+                                <div key={index} className="glass p-4 rounded-2xl">
+                                    <div className="flex items-start justify-between mb-2 gap-3">
+                                        <div className="flex items-center gap-2.5 min-w-0">
+                                            <div className="relative w-8 h-8 rounded-full overflow-hidden bg-black/10 shrink-0 border border-black/10">
+                                                {review.photo ? (
+                                                    <Image src={review.photo} alt={review.name} fill className="object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-black/40 text-xs font-semibold">
+                                                        {review.name?.[0]?.toUpperCase() || '?'}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-black font-medium text-sm truncate">
+                                                    {review.name}
+                                                </p>
+                                                <div className="flex gap-0.5 mt-0.5">
+                                                    {[1, 2, 3, 4, 5].map((star) => (
+                                                        <span
+                                                            key={star}
+                                                            className={`text-sm ${star <= review.rating ? 'text-yellow-400' : 'text-black/20'}`}
+                                                        >
+                                                            ★
+                                                        </span>
+                                                    ))}
                                                 </div>
-                                            )}
-                                        </div>
-                                        <div className="min-w-0">
-                                            <p className="text-black font-medium text-sm truncate">
-                                                {review.name}
-                                            </p>
-                                            <div className="flex gap-0.5 mt-0.5">
-                                                {[1, 2, 3, 4, 5].map((star) => (
-                                                    <span
-                                                        key={star}
-                                                        className={`text-sm ${star <= review.rating ? 'text-yellow-400' : 'text-black/20'}`}
-                                                    >
-                                                        ★
-                                                    </span>
-                                                ))}
                                             </div>
                                         </div>
+                                        <p className="text-black/30 text-xs shrink-0">
+                                            {new Date(review.createdAt).toLocaleDateString('en-BD', {
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: 'numeric',
+                                            })}
+                                        </p>
                                     </div>
-                                    <p className="text-black/30 text-xs shrink-0">
-                                        {new Date(review.createdAt).toLocaleDateString('en-BD', {
-                                            year: 'numeric',
-                                            month: 'short',
-                                            day: 'numeric',
-                                        })}
-                                    </p>
+                                    <p className="text-black/60 text-sm text-left mt-1">{review.comment}</p>
                                 </div>
-                                <p className="text-black/60 text-sm text-left mt-1">{review.comment}</p>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+                            ))}
+                        </div>
+                    )
+                }
+            </div >
 
             {/* Fullscreen Lightbox UI placed at the bottom of return block */}
-            {lightbox && (
-                <div
-                    className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-                    onClick={() => setLightbox(false)}
-                >
-                    <button
-                        className="absolute top-4 right-4 text-white text-3xl hover:text-white/70 transition"
+            {
+                lightbox && (
+                    <div
+                        className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
                         onClick={() => setLightbox(false)}
                     >
-                        ✕
-                    </button>
-                    <div className="relative max-w-3xl w-full aspect-square">
-                        <Image
-                            src={lightboxImage}
-                            alt="Full view"
-                            fill
-                            className="object-contain"
-                        />
+                        <button
+                            className="absolute top-4 right-4 text-white text-3xl hover:text-white/70 transition"
+                            onClick={() => setLightbox(false)}
+                        >
+                            ✕
+                        </button>
+                        <div className="relative max-w-3xl w-full aspect-square">
+                            <Image
+                                src={lightboxImage}
+                                alt="Full view"
+                                fill
+                                className="object-contain"
+                            />
+                        </div>
+                        <p className="absolute bottom-4 text-white/40 text-sm">
+                            Click anywhere to close
+                        </p>
                     </div>
-                    <p className="absolute bottom-4 text-white/40 text-sm">
-                        Click anywhere to close
-                    </p>
-                </div>
-            )}
+                )
+            }
 
-        </div>
+        </div >
     );
 }

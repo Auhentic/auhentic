@@ -108,6 +108,7 @@ export async function POST(request) {
         let restrictedCharge = null;
 
         let coupon = null;
+        let couponOrderPhone = null; // needed again later when "burning" an all-customer coupon
         if (body.couponCode) {
             coupon = await Coupon.findOne({ code: body.couponCode.trim().toUpperCase(), active: true, usedInOrder: null });
             if (coupon) {
@@ -116,11 +117,15 @@ export async function POST(request) {
                 const dbUser = user ? await User.findById(user.id).select('phone email') : null;
                 const orderPhone = dbUser?.phone || shippingAddress.phone;
                 const orderEmail = (dbUser?.email || guestInfo?.email)?.toLowerCase();
+                couponOrderPhone = orderPhone;
                 const matches =
+                    coupon.targetAll ||
                     (coupon.targetPhone && coupon.targetPhone === orderPhone) ||
                     (coupon.targetEmail && coupon.targetEmail === orderEmail);
                 if (!matches) coupon = null;
                 if (coupon && coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) coupon = null;
+                // All-customer coupon — this phone already redeemed it once
+                if (coupon && coupon.targetAll && orderPhone && coupon.usedByPhones?.includes(orderPhone)) coupon = null;
             }
         }
         // A coupon is good for exactly ONE unit of ONE eligible item —
@@ -179,7 +184,8 @@ export async function POST(request) {
             if (coupon && !couponConsumed) {
                 const matchesProduct = coupon.scope === 'product' && coupon.targetProduct?.toString() === product._id.toString();
                 const matchesCategory = coupon.scope === 'category' && product.category === coupon.targetCategory;
-                if (matchesProduct || matchesCategory) {
+                const matchesAll = coupon.scope === 'all';
+                if (matchesProduct || matchesCategory || matchesAll) {
                     const discountedUnitPrice = Math.round(price * (1 - coupon.discountPercent / 100));
                     lineTotal = discountedUnitPrice + price * (item.quantity - 1);
                     couponConsumed = true;
@@ -238,8 +244,16 @@ export async function POST(request) {
         });
 
         // Burn the coupon now that we have a real order id — one-time use only.
+        // Burn the coupon now that we have a real order id.
+        // Personal coupons (one customer) are one-time use — delete entirely.
+        // "All customer" coupons stay alive but remember this phone used it,
+        // so this same person can't reuse it while everyone else still can.
         if (coupon && couponConsumed) {
-            await Coupon.findByIdAndDelete(coupon._id);
+            if (coupon.targetAll) {
+                await Coupon.findByIdAndUpdate(coupon._id, { $addToSet: { usedByPhones: couponOrderPhone } });
+            } else {
+                await Coupon.findByIdAndDelete(coupon._id);
+            }
         }
 
         // Reduce stock for each product

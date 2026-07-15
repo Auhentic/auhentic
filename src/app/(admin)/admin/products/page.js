@@ -4,20 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import DateTimePicker from '@/components/admin/DateTimePicker';
 
-const BD_DISTRICTS = [
-    'Bagerhat', 'Bandarban', 'Barguna', 'Barishal', 'Bhola', 'Bogura', 'Brahmanbaria',
-    'Chandpur', 'Chapai Nawabganj', 'Chattogram', 'Chuadanga', "Cox's Bazar", 'Cumilla',
-    'Dhaka', 'Dinajpur', 'Faridpur', 'Feni', 'Gaibandha', 'Gazipur', 'Gopalganj',
-    'Habiganj', 'Jamalpur', 'Jashore', 'Jhalokati', 'Jhenaidah', 'Joypurhat',
-    'Khagrachhari', 'Khulna', 'Kishoreganj', 'Kurigram', 'Kushtia', 'Lakshmipur',
-    'Lalmonirhat', 'Madaripur', 'Magura', 'Manikganj', 'Meherpur', 'Moulvibazar',
-    'Munshiganj', 'Mymensingh', 'Naogaon', 'Narail', 'Narayanganj', 'Narsingdi',
-    'Natore', 'Netrokona', 'Nilphamari', 'Noakhali', 'Pabna', 'Panchagarh',
-    'Patuakhali', 'Pirojpur', 'Rajbari', 'Rajshahi', 'Rangamati', 'Rangpur',
-    'Satkhira', 'Shariatpur', 'Sherpur', 'Sirajganj', 'Sunamganj', 'Sylhet',
-    'Tangail', 'Thakurgaon',
-];
-
 export default function AdminProductsPage() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -552,18 +538,13 @@ export default function AdminProductsPage() {
                                     <div className="flex flex-col gap-3 mt-1">
                                         {/* District picker + charge */}
                                         <div className="flex gap-2 flex-wrap">
-                                            <select
+                                            <input
+                                                type="text"
                                                 value={restrictDistrictInput}
                                                 onChange={(e) => setRestrictDistrictInput(e.target.value)}
-                                                className="glass-input text-black rounded-3xl flex-1 min-w-0"
-                                            >
-                                                <option value="">Select district...</option>
-                                                {BD_DISTRICTS.filter(
-                                                    (d) => !form.allowedDistricts.find((a) => a.district === d)
-                                                ).map((d) => (
-                                                    <option key={d} value={d}>{d}</option>
-                                                ))}
-                                            </select>
+                                                placeholder="City name, e.g. Inside Dhaka"
+                                                className="glass-input text-black placeholder:text-black/40 rounded-3xl flex-1 min-w-0"
+                                            />
                                             <input
                                                 type="number"
                                                 value={restrictChargeInput}

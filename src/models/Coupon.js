@@ -5,7 +5,9 @@ const couponSchema = new mongoose.Schema(
         code: { type: String, required: true, unique: true, uppercase: true, trim: true },
         targetPhone: { type: String, default: null },
         targetEmail: { type: String, default: null },
-        scope: { type: String, enum: ['product', 'category'], required: true },
+        targetAll: { type: Boolean, default: false }, // true = usable by any customer
+        usedByPhones: [{ type: String }], // tracks who already redeemed an "all customers" coupon
+        scope: { type: String, enum: ['product', 'category', 'all'], required: true },
         targetProduct: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: null },
         targetCategory: { type: String, default: null },
         discountPercent: { type: Number, required: true, min: 1, max: 100 },

@@ -236,11 +236,9 @@ export default function AdminSettingsPage() {
                 </div>
 
                 {/* District Delivery Charges */}
-                <div className="mt-6">
+                {/* <div className="mt-6">
                     <h3 className="text-black/80 text-sm font-semibold mb-3">District-wise Delivery Charges</h3>
 
-                    {/* Add new district */}
-                    {/* Add new district */}
                     <div className="flex gap-2 mb-4">
                         <select
                             value={newDistrict}
@@ -268,7 +266,6 @@ export default function AdminSettingsPage() {
                         </button>
                     </div>
 
-                    {/* District list */}
                     {districtDelivery.length === 0 ? (
                         <p className="text-black/30 text-sm text-center py-4">
                             No districts added yet. Add districts above to set delivery charges.
@@ -307,7 +304,7 @@ export default function AdminSettingsPage() {
                             {districtDelivery.length} district{districtDelivery.length !== 1 ? 's' : ''} configured · {BD_DISTRICTS.length - districtDelivery.length} remaining
                         </p>
                     )}
-                </div>
+                </div> */}
             </div>
 
             {/* Social Links */}

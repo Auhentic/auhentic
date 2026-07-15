@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function AdminCouponsPage() {
     const [coupons, setCoupons] = useState([]);
@@ -11,6 +11,8 @@ export default function AdminCouponsPage() {
     const [customerSearch, setCustomerSearch] = useState('');
     const [customerResults, setCustomerResults] = useState([]);
     const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const skipProductSearchRef = useRef(false); // 👈 add this
+    const [targetAll, setTargetAll] = useState(false);
 
     const [productSearch, setProductSearch] = useState('');
     const [productResults, setProductResults] = useState([]);
@@ -44,7 +46,7 @@ export default function AdminCouponsPage() {
         }
     }
 
-    // Search customer by phone/email/name (reuses the same team search endpoint)
+    // Search customer by phone/email/name (call admin team search endpoint)
     useEffect(() => {
         if (!customerSearch) return setCustomerResults([]);
         const t = setTimeout(async () => {
@@ -56,8 +58,13 @@ export default function AdminCouponsPage() {
     }, [customerSearch]);
 
     // Search product by name
+    // Search product by name
     useEffect(() => {
         if (!productSearch) return setProductResults([]);
+        if (skipProductSearchRef.current) {
+            skipProductSearchRef.current = false; // consume the skip, don't re-search right after a selection
+            return;
+        }
         const t = setTimeout(async () => {
             const res = await fetch(`/api/products?search=${encodeURIComponent(productSearch)}`);
             const data = await res.json();
@@ -75,7 +82,7 @@ export default function AdminCouponsPage() {
         setError('');
         setSuccess('');
 
-        if (!selectedCustomer) return setError('Select a customer first');
+        if (!targetAll && !selectedCustomer) return setError('Select a customer first');
         if (!form.code) return setError('Generate or type a coupon code');
         if (!form.discountPercent) return setError('Enter a discount percentage');
         if (form.scope === 'product' && !form.targetProduct) return setError('Select a product');
@@ -87,17 +94,19 @@ export default function AdminCouponsPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...form,
-                    targetPhone: selectedCustomer.phone,
-                    targetEmail: selectedCustomer.email,
+                    targetAll,
+                    targetPhone: targetAll ? null : selectedCustomer?.phone,
+                    targetEmail: targetAll ? null : selectedCustomer?.email,
                 }),
             });
             const data = await res.json();
             if (!res.ok) return setError(data.message);
 
-            setSuccess(`Coupon ${data.coupon.code} created for ${selectedCustomer.name}`);
+            setSuccess(`Coupon ${data.coupon.code} created for ${targetAll ? 'all customers' : selectedCustomer.name}`);
             setForm({ code: '', scope: 'product', targetProduct: '', targetCategory: '', discountPercent: '', expiresAt: '' });
             setSelectedCustomer(null);
             setCustomerSearch('');
+            setTargetAll(false);
             fetchCoupons();
         } catch {
             setError('Something went wrong');
@@ -123,35 +132,52 @@ export default function AdminCouponsPage() {
             <div className="glass rounded-3xl p-6 mb-8 flex flex-col gap-4">
                 <h3 className="text-black font-semibold text-sm">New Coupon</h3>
 
-                {/* Customer picker */}
-                <div className="relative">
+                {/* All Customers toggle */}
+                <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
-                        type="text"
-                        value={selectedCustomer ? `${selectedCustomer.name} (${selectedCustomer.phone || selectedCustomer.email})` : customerSearch}
+                        type="checkbox"
+                        checked={targetAll}
                         onChange={(e) => {
+                            setTargetAll(e.target.checked);
                             setSelectedCustomer(null);
-                            setCustomerSearch(e.target.value);
+                            setCustomerSearch('');
                         }}
-                        placeholder="Search customer by phone, name, or email..."
-                        className="glass-input rounded-3xl w-full"
+                        className="w-4 h-4 accent-[#3E2723]"
                     />
-                    {customerResults.length > 0 && !selectedCustomer && (
-                        <div className="absolute z-10 top-full mt-1 left-0 right-0 glass rounded-2xl overflow-hidden max-h-48 overflow-y-auto">
-                            {customerResults.map((u) => (
-                                <div
-                                    key={u._id}
-                                    onClick={() => {
-                                        setSelectedCustomer(u);
-                                        setCustomerResults([]);
-                                    }}
-                                    className="px-4 py-2 text-sm hover:bg-black/5 cursor-pointer text-black"
-                                >
-                                    {u.name} — {u.phone || u.email}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                    <span className="text-black/80 text-sm font-medium">🌍 Apply to all customers</span>
+                </label>
+
+                {/* Customer picker (only shown if not targeting all) */}
+                {!targetAll && (
+                    <div className="relative">
+                        <input
+                            type="text"
+                            value={selectedCustomer ? `${selectedCustomer.name} (${selectedCustomer.phone || selectedCustomer.email})` : customerSearch}
+                            onChange={(e) => {
+                                setSelectedCustomer(null);
+                                setCustomerSearch(e.target.value);
+                            }}
+                            placeholder="Search customer by phone, name, or email..."
+                            className="glass-input rounded-3xl w-full"
+                        />
+                        {customerResults.length > 0 && !selectedCustomer && (
+                            <div className="absolute z-10 top-full mt-1 left-0 right-0 glass rounded-2xl overflow-hidden max-h-48 overflow-y-auto">
+                                {customerResults.map((u) => (
+                                    <div
+                                        key={u._id}
+                                        onClick={() => {
+                                            setSelectedCustomer(u);
+                                            setCustomerResults([]);
+                                        }}
+                                        className="px-4 py-2 text-sm hover:bg-black/5 cursor-pointer text-black"
+                                    >
+                                        {u.name} — {u.phone || u.email}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Scope */}
                 <div className="flex gap-3">
@@ -162,9 +188,14 @@ export default function AdminCouponsPage() {
                     >
                         <option value="product">Specific Product</option>
                         <option value="category">Whole Category</option>
+                        <option value="all">All Products</option>
                     </select>
 
-                    {form.scope === 'product' ? (
+                    {form.scope === 'all' ? (
+                        <div className="flex-1 flex items-center px-4 text-black/40 text-sm">
+                            Applies store-wide — no product/category to pick
+                        </div>
+                    ) : form.scope === 'product' ? (
                         <div className="relative flex-1">
                             <input
                                 type="text"
@@ -179,6 +210,7 @@ export default function AdminCouponsPage() {
                                         <div
                                             key={p._id}
                                             onClick={() => {
+                                                skipProductSearchRef.current = true;
                                                 setForm({ ...form, targetProduct: p._id });
                                                 setProductSearch(p.name);
                                                 setProductResults([]);
@@ -223,7 +255,7 @@ export default function AdminCouponsPage() {
                         placeholder="Coupon code"
                         className="glass-input rounded-3xl flex-1"
                     />
-                    <button onClick={generateCode} className="glass-inputs px-4 py-2 rounded-3xl text-sm w-[33%] ">
+                    <button onClick={generateCode} className="glass-inputs px-4 py-2 rounded-3xl text-sm w-[33%]">
                         🎲 Generate
                     </button>
                 </div>
@@ -252,7 +284,7 @@ export default function AdminCouponsPage() {
                                 <div>
                                     <p className="text-black font-medium text-sm">{c.code}</p>
                                     <p className="text-black/50 text-xs">
-                                        {c.targetPhone || c.targetEmail} — {c.discountPercent}% off{' '}
+                                        {c.targetAll ? 'All Customers' : (c.targetPhone || c.targetEmail)} — {c.discountPercent}% off{' '}
                                         {c.scope === 'product' ? c.targetProduct?.name : c.targetCategory}
                                     </p>
                                     <p className="text-black/30 text-xs">

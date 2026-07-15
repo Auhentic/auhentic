@@ -36,8 +36,13 @@ export async function POST(request) {
         const phoneMatches = coupon.targetPhone && dbUser?.phone && coupon.targetPhone === dbUser.phone;
         const emailMatches = coupon.targetEmail && dbUser?.email && coupon.targetEmail === dbUser.email?.toLowerCase();
 
-        if (!phoneMatches && !emailMatches) {
+        if (!coupon.targetAll && !phoneMatches && !emailMatches) {
             return NextResponse.json({ valid: false, message: 'This coupon is not valid for you' }, { status: 403 });
+        }
+
+        // All-customer coupon — block this person if they've already redeemed it once
+        if (coupon.targetAll && dbUser?.phone && coupon.usedByPhones?.includes(dbUser.phone)) {
+            return NextResponse.json({ valid: false, message: 'You have already used this coupon' }, { status: 400 });
         }
 
         return NextResponse.json({
