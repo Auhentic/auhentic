@@ -111,7 +111,7 @@ export default function RegisterPage() {
                 body: JSON.stringify({ 
                     ...formData, 
                     otp, 
-                    photo: photoData,
+                    photo: formData.photo,
                  }),
             });
 

@@ -6,13 +6,13 @@ import { sendOTPEmail } from '@/lib/brevo';
 
 export async function POST(request) {
     try {
-        console.log('1 — send-otp hit');
+        // console.log('1 — send-otp hit');
 
         await connectDB();
-        console.log('2 — DB connected');
+        // console.log('2 — DB connected');
 
         const { email } = await request.json();
-        console.log('3 — email received:', email);
+        // console.log('3 — email received:', email);
 
         if (!email) {
             return NextResponse.json(
@@ -28,19 +28,19 @@ export async function POST(request) {
                 { status: 409 }
             );
         }
-        console.log('4 — email not duplicate');
+        // console.log('4 — email not duplicate');
 
         await OTP.deleteMany({ email: email.toLowerCase() });
-        console.log('5 — old OTPs cleared');
+        // console.log('5 — old OTPs cleared');
 
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        console.log('6 — OTP generated');
+        // console.log('6 — OTP generated');
 
         await OTP.create({ email: email.toLowerCase(), otp });
-        console.log('7 — OTP saved to DB');
+        // console.log('7 — OTP saved to DB');
 
         await sendOTPEmail(email, otp);
-        console.log('8 — email sent');
+        // console.log('8 — email sent');
 
         return NextResponse.json(
             { message: 'OTP sent to your email' },
