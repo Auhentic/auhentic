@@ -180,62 +180,63 @@ export default function AdminOrdersPage() {
             ) : (
                 <>
                     {/* Bulk Action Bar — appears when any order is selected */}
-                    <div className={`sticky top-4 z-20 mb-4 transition-all duration-300 ${someSelected ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}`}>
-                        <div className="glass rounded-3xl p-4 flex flex-wrap items-center gap-3 border border-black/20 shadow-lg">
-                            <span className="text-black font-medium text-sm">
-                                {selectedIds.length} order{selectedIds.length > 1 ? 's' : ''} selected
-                            </span>
-                            <div className="flex items-center gap-2 ml-auto flex-wrap">
-                                <span className="text-black/50 text-sm">Set all to:</span>
-                                <select
-                                    value={bulkStatus}
-                                    onChange={(e) => setBulkStatus(e.target.value)}
-                                    className="glass-input text-sm py-1.5 px-3 w-auto rounded-3xl text-black"
-                                >
-                                    {STATUS_OPTIONS.map((s) => (
-                                        <option key={s} value={s} className="bg-[#bbf7d0] text-black">
-                                            {s.charAt(0).toUpperCase() + s.slice(1)}
-                                        </option>
-                                    ))}
-                                </select>
-                                <button
-                                    onClick={handleBulkUpdate}
-                                    disabled={bulkLoading}
-                                    className="glass-btn-primary px-5 py-1.5 w-auto text-sm rounded-3xl text-black"
-                                >
-                                    {bulkLoading ? 'Updating...' : 'Apply'}
-                                </button>
+                    {someSelected && (
+                        <div className={`sticky top-4 z-20 mb-4 transition-all duration-300 ${someSelected ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}`}>
+                            <div className="glass rounded-3xl p-4 flex flex-wrap items-center gap-3 border border-black/20 shadow-lg">
+                                <span className="text-black font-medium text-sm">
+                                    {selectedIds.length} order{selectedIds.length > 1 ? 's' : ''} selected
+                                </span>
+                                <div className="flex items-center gap-2 ml-auto flex-wrap">
+                                    <span className="text-black/50 text-sm">Set all to:</span>
+                                    <select
+                                        value={bulkStatus}
+                                        onChange={(e) => setBulkStatus(e.target.value)}
+                                        className="glass-input text-sm py-1.5 px-3 w-auto rounded-3xl text-black"
+                                    >
+                                        {STATUS_OPTIONS.map((s) => (
+                                            <option key={s} value={s} className="bg-[#bbf7d0] text-black">
+                                                {s.charAt(0).toUpperCase() + s.slice(1)}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <button
+                                        onClick={handleBulkUpdate}
+                                        disabled={bulkLoading}
+                                        className="glass-btn-primary px-5 py-1.5 w-auto text-sm rounded-3xl text-black"
+                                    >
+                                        {bulkLoading ? 'Updating...' : 'Apply'}
+                                    </button>
 
-                                <span className="text-black/50 text-sm ml-2">Payment:</span>
-                                <select
-                                    value={bulkPaymentStatus}
-                                    onChange={(e) => setBulkPaymentStatus(e.target.value)}
-                                    className="glass-input text-sm py-1.5 px-3 w-auto rounded-3xl text-black"
-                                >
-                                    {['pending', 'paid', 'failed'].map((s) => (
-                                        <option key={s} value={s} className="bg-[#bbf7d0] text-black">
-                                            {s.charAt(0).toUpperCase() + s.slice(1)}
-                                        </option>
-                                    ))}
-                                </select>
-                                <button
-                                    onClick={handleBulkPaymentUpdate}
-                                    disabled={bulkPaymentLoading}
-                                    className="glass-btn-primary px-5 py-1.5 w-auto text-sm rounded-3xl text-black"
-                                >
-                                    {bulkPaymentLoading ? 'Updating...' : 'Apply'}
-                                </button>
+                                    <span className="text-black/50 text-sm ml-2">Payment:</span>
+                                    <select
+                                        value={bulkPaymentStatus}
+                                        onChange={(e) => setBulkPaymentStatus(e.target.value)}
+                                        className="glass-input text-sm py-1.5 px-3 w-auto rounded-3xl text-black"
+                                    >
+                                        {['pending', 'paid', 'failed'].map((s) => (
+                                            <option key={s} value={s} className="bg-[#bbf7d0] text-black">
+                                                {s.charAt(0).toUpperCase() + s.slice(1)}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <button
+                                        onClick={handleBulkPaymentUpdate}
+                                        disabled={bulkPaymentLoading}
+                                        className="glass-btn-primary px-5 py-1.5 w-auto text-sm rounded-3xl text-black"
+                                    >
+                                        {bulkPaymentLoading ? 'Updating...' : 'Apply'}
+                                    </button>
 
-                                <button
-                                    onClick={() => setSelectedIds([])}
-                                    className="text-black/40 hover:text-black transition text-sm px-2"
-                                >
-                                    ✕ Clear
-                                </button>
+                                    <button
+                                        onClick={() => setSelectedIds([])}
+                                        className="text-black/40 hover:text-black transition text-sm px-2"
+                                    >
+                                        ✕ Clear
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
+                    )}
                     {/* Select All row */}
                     <div className="flex items-center gap-3 px-2 mb-3">
                         <input
