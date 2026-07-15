@@ -258,7 +258,6 @@ export default function ProductDetailPage() {
                                             ? 'border-blue-400'
                                             : 'border-transparent hover:border-black/30'
                                         }`}
-                                    Dino
                                 >
                                     <Image
                                         src={img.url}
