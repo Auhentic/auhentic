@@ -15,6 +15,7 @@ export default function ProductDetailPage() {
     const [quantity, setQuantity] = useState(1);
     const [selectedVariant, setSelectedVariant] = useState(null);
     const [activeImage, setActiveImage] = useState(0);
+    const [manualImageOverride, setManualImageOverride] = useState(null); // set when user explicitly clicks a basic thumbnail
     const [user, setUser] = useState(null);
     const [hasDelivered, setHasDelivered] = useState(false);
     const [settings, setSettings] = useState(null);
@@ -216,17 +217,19 @@ export default function ProductDetailPage() {
                     <div
                         className="relative w-full aspect-square rounded-xl overflow-hidden bg-black/5 cursor-zoom-in"
                         onClick={() => {
-                            const url = selectedVariant?.image?.url || product.images?.[activeImage]?.url;
+                            const url = manualImageOverride || selectedVariant?.image?.url || product.images?.[activeImage]?.url;
                             if (url) {
                                 setLightboxImage(url);
                                 setLightbox(true);
                             }
                         }}
                     >
-                        {(selectedVariant?.image?.url || product.images?.[activeImage]?.url) ? (
+                        {/* {(selectedVariant?.image?.url || product.images?.[activeImage]?.url) ? ( */}
+                        {(manualImageOverride || selectedVariant?.image?.url || product.images?.[activeImage]?.url) ? (
                             <>
                                 <Image
-                                    src={selectedVariant?.image?.url || product.images[activeImage].url}
+                                    // src={selectedVariant?.image?.url || product.images[activeImage].url}
+                                    src={manualImageOverride || selectedVariant?.image?.url || product.images[activeImage].url}
                                     alt={selectedVariant ? `${product.name} - ${selectedVariant.label}` : product.name}
                                     fill
                                     className="object-contain"
@@ -248,7 +251,8 @@ export default function ProductDetailPage() {
                             {product.images.map((img, index) => (
                                 <button
                                     key={index}
-                                    onClick={() => setActiveImage(index)}
+                                    // onClick={() => setActiveImage(index)}
+                                    onClick={() => { setActiveImage(index); setManualImageOverride(img.url); }}
                                     className={`relative w-16 h-16 rounded-lg overflow-hidden bg-black/5 border-2 transition
                                         ${activeImage === index
                                             ? 'border-blue-400'
@@ -360,7 +364,8 @@ export default function ProductDetailPage() {
                                 {product.variants.map((v, i) => (
                                     <button
                                         key={i}
-                                        onClick={() => setSelectedVariant(v)}
+                                        // onClick={() => setSelectedVariant(v)}
+                                        onClick={() => { setSelectedVariant(v); setManualImageOverride(null); }}
                                         className={`px-4 py-2 rounded-full text-sm font-medium border transition
                                             ${selectedVariant?.label === v.label
                                                 ? 'bg-black text-white border-black'
