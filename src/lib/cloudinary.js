@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
+// import cloudinary from '@/lib/cloudinary';
 
 if (
     !process.env.CLOUDINARY_CLOUD_NAME ||

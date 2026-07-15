@@ -153,7 +153,7 @@ export default function ProductDetailPage() {
                 currency: 'BDT',
             });
         }
-        
+
         router.push('/cart');
     }
 
@@ -216,19 +216,20 @@ export default function ProductDetailPage() {
                     <div
                         className="relative w-full aspect-square rounded-xl overflow-hidden bg-black/5 cursor-zoom-in"
                         onClick={() => {
-                            if (product.images?.[activeImage]?.url) {
-                                setLightboxImage(product.images[activeImage].url);
+                            const url = selectedVariant?.image?.url || product.images?.[activeImage]?.url;
+                            if (url) {
+                                setLightboxImage(url);
                                 setLightbox(true);
                             }
                         }}
                     >
-                        {product.images?.[activeImage]?.url ? (
+                        {(selectedVariant?.image?.url || product.images?.[activeImage]?.url) ? (
                             <>
                                 <Image
-                                    src={product.images[activeImage].url}
-                                    alt={product.name}
+                                    src={selectedVariant?.image?.url || product.images[activeImage].url}
+                                    alt={selectedVariant ? `${product.name} - ${selectedVariant.label}` : product.name}
                                     fill
-                                    className="object-cover"
+                                    className="object-contain"
                                 />
                                 <div className="absolute bottom-2 right-2 glass rounded-lg px-2 py-1 text-xs text-black/60 z-10">
                                     🔍 Click to enlarge
@@ -259,7 +260,7 @@ export default function ProductDetailPage() {
                                         src={img.url}
                                         alt={`${product.name} ${index + 1}`}
                                         fill
-                                        className="object-cover"
+                                        className="object-contain"
                                     />
                                 </button>
                             ))}
@@ -551,7 +552,7 @@ export default function ProductDetailPage() {
                                         <div className="flex items-center gap-2.5 min-w-0">
                                             <div className="relative w-8 h-8 rounded-full overflow-hidden bg-black/10 shrink-0 border border-black/10">
                                                 {review.photo ? (
-                                                    <Image src={review.photo} alt={review.name} fill className="object-cover" />
+                                                    <Image src={review.photo} alt={review.name} fill className="object-contain" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-black/40 text-xs font-semibold">
                                                         {review.name?.[0]?.toUpperCase() || '?'}

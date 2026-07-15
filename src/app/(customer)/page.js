@@ -118,7 +118,7 @@ export default async function HomePage() {
                 {offerProducts.length > 0 && (
                     <div className="w-full lg:flex-[2_1_0%] lg:min-h-0">
                         <ProductScrollRow
-                            title="Ongoing Offer Product"
+                            title="Offer Product"
                             icon="🏷️"
                             seeAllHref="/products?offer=true"
                             seeAllLabel="See All Offer"

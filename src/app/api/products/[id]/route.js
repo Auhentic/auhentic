@@ -5,8 +5,14 @@ import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
-import { v2 as cloudinary } from 'cloudinary';
+import cloudinary from '@/lib/cloudinary';
 import { pushNotification } from '@/lib/notify';
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // ----------------------------------------
 // GET /api/products/[id]

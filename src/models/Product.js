@@ -69,6 +69,10 @@ const productSchema = new mongoose.Schema(
             {
                 label: { type: String, required: true },
                 price: { type: Number, required: true, min: 0 },
+                image: {
+                    url: { type: String, default: '' },
+                    publicId: { type: String, default: '' },
+                },
             }
         ],
 

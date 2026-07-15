@@ -42,6 +42,8 @@ export default function AdminProductsPage() {
     const [form, setForm] = useState(emptyForm);
     const [variantLabel, setVariantLabel] = useState('');
     const [variantPrice, setVariantPrice] = useState('');
+    const [variantImageFile, setVariantImageFile] = useState(null); // 👈 add
+    const [variantUploading, setVariantUploading] = useState(false); // 👈 add
     const [restrictDistrictInput, setRestrictDistrictInput] = useState('');
     const [restrictChargeInput, setRestrictChargeInput] = useState('');
 
@@ -67,13 +69,31 @@ export default function AdminProductsPage() {
         setError('');
     }
 
-    function addVariant() {
+    async function addVariant() {
         const label = variantLabel.trim();
         const price = Number(variantPrice);
         if (!label || !price) return;
-        setForm((prev) => ({ ...prev, variants: [...prev.variants, { label, price }] }));
+
+        let image = { url: '', publicId: '' };
+        if (variantImageFile) {
+            setVariantUploading(true);
+            try {
+                const fd = new FormData();
+                fd.append('image', variantImageFile);
+                const res = await fetch('/api/upload', { method: 'POST', body: fd });
+                if (res.ok) {
+                    const data = await res.json();
+                    image = { url: data.url, publicId: data.publicId };
+                }
+            } finally {
+                setVariantUploading(false);
+            }
+        }
+
+        setForm((prev) => ({ ...prev, variants: [...prev.variants, { label, price, image }] }));
         setVariantLabel('');
         setVariantPrice('');
+        setVariantImageFile(null);
     }
 
     function removeVariant(index) {
@@ -143,16 +163,16 @@ export default function AdminProductsPage() {
     }
 
     function handleFileChange(e) {
-        // Slots left = 3 minus existing DB images minus new files already queued
-        const totalAllowed = 3 - existingImages.length - imageFiles.length;
+        // Slots left = 5 minus existing DB images minus new files already queued
+        const totalAllowed = 5 - existingImages.length - imageFiles.length;
         if (totalAllowed <= 0) {
-            setError('You already have 3 images. Remove one to add more.');
+            setError('You already have 5 images. Remove one to add more.');
             e.target.value = '';
             return;
         }
         const newFiles = Array.from(e.target.files).slice(0, totalAllowed);
         // Append to existing selections instead of replacing
-        const merged = [...imageFiles, ...newFiles].slice(0, 3 - existingImages.length);
+        const merged = [...imageFiles, ...newFiles].slice(0, 5 - existingImages.length);
         setImageFiles(merged);
         setImagePreviews(merged.map((f) => URL.createObjectURL(f)));
         setError('');
@@ -193,7 +213,7 @@ export default function AdminProductsPage() {
             // Upload new files and append
             if (imageFiles.length > 0) {
                 const uploaded = await uploadImages();
-                images = [...images, ...uploaded].slice(0, 3);
+                images = [...images, ...uploaded].slice(0, 5);
             }
 
             const payload = {
@@ -482,7 +502,7 @@ export default function AdminProductsPage() {
                                 <p className="text-black/80 text-sm font-medium">
                                     📦 Quantity Variants <span className="text-black/40 font-normal">(optional — e.g. 100ml, 250ml, 1kg)</span>
                                 </p>
-                                <div className="flex gap-2 flex-wrap">
+                                <div className="flex gap-2 flex-wrap items-center">
                                     <input
                                         type="text"
                                         value={variantLabel}
@@ -497,14 +517,26 @@ export default function AdminProductsPage() {
                                         placeholder="Price ৳"
                                         className="glass-input text-black placeholder:text-black/40 rounded-3xl w-28"
                                     />
-                                    <button type="button" onClick={addVariant} className="glass-btn px-4 py-2 w-auto text-sm">
-                                        + Add
+                                    <label className="glass-input text-black/60 text-xs rounded-3xl px-3 py-2 cursor-pointer whitespace-nowrap">
+                                        {variantImageFile ? '✓ Image picked' : '📷 Variant image (optional)'}
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={(e) => setVariantImageFile(e.target.files?.[0] || null)}
+                                        />
+                                    </label>
+                                    <button type="button" onClick={addVariant} disabled={variantUploading} className="glass-btn px-4 py-2 w-auto text-sm">
+                                        {variantUploading ? 'Uploading...' : '+ Add'}
                                     </button>
                                 </div>
                                 {form.variants.length > 0 && (
                                     <div className="flex gap-2 flex-wrap">
                                         {form.variants.map((v, i) => (
-                                            <div key={i} className="flex items-center gap-1.5 bg-black/10 rounded-full px-3 py-1 text-sm text-black">
+                                            <div key={i} className="flex items-center gap-1.5 bg-black/10 rounded-full pl-1 pr-3 py-1 text-sm text-black">
+                                                {v.image?.url && (
+                                                    <img src={v.image.url} alt={v.label} className="w-6 h-6 rounded-full object-cover" />
+                                                )}
                                                 <span>{v.label} — ৳{v.price}</span>
                                                 <button type="button" onClick={() => removeVariant(i)} className="text-black/40 hover:text-red-600 transition font-bold">✕</button>
                                             </div>
@@ -588,7 +620,7 @@ export default function AdminProductsPage() {
                         {/* ── IMAGE UPLOAD ── */}
                         <div className="md:col-span-2">
                             <label className="text-black/70 text-sm mb-1 block">
-                                Product Images ({totalImages}/3 used)
+                                Product Images ({totalImages}/5 used)
                             </label>
 
                             {/* Existing images from DB */}
@@ -615,7 +647,7 @@ export default function AdminProductsPage() {
                             )}
 
                             {/* New file picker — only show if under 3 total */}
-                            {totalImages < 3 && (
+                            {totalImages < 5 && (
                                 <input
                                     ref={fileRef}
                                     type="file"
@@ -626,9 +658,9 @@ export default function AdminProductsPage() {
                                 />
                             )}
 
-                            {totalImages >= 3 && (
+                            {totalImages >= 5 && (
                                 <p className="text-xs text-black/50 mt-1">
-                                    Maximum 3 images reached. Remove an existing image to upload a new one.
+                                    Maximum 5 images reached. Remove an existing image to upload a new one.
                                 </p>
                             )}
 
