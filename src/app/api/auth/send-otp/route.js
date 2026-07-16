@@ -3,6 +3,7 @@ import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import OTP from '@/models/OTP';
 import { sendOTPEmail } from '@/lib/brevo';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'; // add to top imports
 
 export async function POST(request) {
     try {
@@ -18,6 +19,23 @@ export async function POST(request) {
             return NextResponse.json(
                 { message: 'Email is required' },
                 { status: 400 }
+            );
+        }
+
+        const emailLimit = checkRateLimit(`otp:email:${email.toLowerCase()}`, 3, 10 * 60 * 1000);
+        if (!emailLimit.allowed) {
+            return NextResponse.json(
+                { message: `Too many OTP requests for this email. Try again in ${Math.ceil(emailLimit.retryAfterSeconds / 60)} minute(s).` },
+                { status: 429 }
+            );
+        }
+
+        const ip = getClientIp(request);
+        const ipLimit = checkRateLimit(`otp:ip:${ip}`, 8, 15 * 60 * 1000);
+        if (!ipLimit.allowed) {
+            return NextResponse.json(
+                { message: `Too many OTP requests from this network. Try again in ${Math.ceil(ipLimit.retryAfterSeconds / 60)} minute(s).` },
+                { status: 429 }
             );
         }
 

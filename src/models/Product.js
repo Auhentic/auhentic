@@ -115,5 +115,9 @@ productSchema.pre('save', function () {
         this.reviews.length;
 });
 
+productSchema.index({ isAvailable: 1, category: 1 });
+productSchema.index({ isAvailable: 1, isTopSelling: 1 });
+productSchema.index({ isAvailable: 1, 'offer.isOnOffer': 1 });
+
 const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
 export default Product;

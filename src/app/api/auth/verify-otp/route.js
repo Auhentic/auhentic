@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import OTP from '@/models/OTP';
+import { checkRateLimit } from '@/lib/rateLimit'; // add to top imports
 import { signToken, setTokenCookie } from '@/lib/auth';
 
 export async function POST(request) {
@@ -14,6 +15,14 @@ export async function POST(request) {
             return NextResponse.json(
                 { message: 'All fields are required' },
                 { status: 400 }
+            );
+        }
+
+        const otpAttemptLimit = checkRateLimit(`otp-verify:${email.toLowerCase()}`, 5, 10 * 60 * 1000);
+        if (!otpAttemptLimit.allowed) {
+            return NextResponse.json(
+                { message: `Too many attempts. Try again in ${Math.ceil(otpAttemptLimit.retryAfterSeconds / 60)} minute(s).` },
+                { status: 429 }
             );
         }
 
@@ -38,12 +47,12 @@ export async function POST(request) {
         await OTP.deleteMany({ email: email.toLowerCase() });
 
         // create user
-        const user = await User.create({ 
-            name, 
-            email, 
+        const user = await User.create({
+            name,
+            email,
             phone,
-            password, 
-            photo: photo || { url: '', publicId: '' }, 
+            password,
+            photo: photo || { url: '', publicId: '' },
         });
 
         const token = signToken({

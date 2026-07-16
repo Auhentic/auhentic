@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import { signToken } from '@/lib/auth';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'; // add to top imports
 
 export async function POST(request) {
     try {
@@ -14,6 +15,23 @@ export async function POST(request) {
             return NextResponse.json(
                 { message: 'Email and password are required' },
                 { status: 400 }
+            );
+        }
+
+        const emailLimit = checkRateLimit(`login:email:${email.toLowerCase()}`, 8, 10 * 60 * 1000);
+        if (!emailLimit.allowed) {
+            return NextResponse.json(
+                { message: `Too many login attempts. Try again in ${Math.ceil(emailLimit.retryAfterSeconds / 60)} minute(s).` },
+                { status: 429 }
+            );
+        }
+
+        const ip = getClientIp(request);
+        const ipLimit = checkRateLimit(`login:ip:${ip}`, 20, 10 * 60 * 1000);
+        if (!ipLimit.allowed) {
+            return NextResponse.json(
+                { message: `Too many login attempts from this network. Try again in ${Math.ceil(ipLimit.retryAfterSeconds / 60)} minute(s).` },
+                { status: 429 }
             );
         }
 

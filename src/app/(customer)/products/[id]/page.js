@@ -43,6 +43,8 @@ export default function ProductDetailPage() {
             window.fbq('track', 'ViewContent', {
                 content_ids: [id],
                 content_type: 'product',
+                value: product?.price || 0,       // add
+                currency: 'BDT',                  // add
             });
         }
     }, [id]);
