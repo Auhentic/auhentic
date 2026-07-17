@@ -3,6 +3,7 @@ import Product from '@/models/Product';
 import Order from '@/models/Order';
 import User from '@/models/User';
 import Link from 'next/link';
+export const dynamic = 'force-dynamic';
 
 async function getStats() {
     await connectDB();
