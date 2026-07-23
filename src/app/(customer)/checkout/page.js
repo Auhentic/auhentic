@@ -52,7 +52,7 @@ export default function CheckoutPage() {
             return;
         }
         setCart(stored);
-        
+
         if (typeof window !== 'undefined' && window.fbq) {
             window.fbq('track', 'InitiateCheckout', {
                 content_ids: stored.map((item) => item.productId),
@@ -258,13 +258,21 @@ export default function CheckoutPage() {
         const entry = settings?.districtDelivery?.find(
             (d) => d.district.toLowerCase() === district.trim().toLowerCase()
         );
-        return entry !== undefined ? entry.charge : 80;
+        return entry !== undefined ? entry.charge : null; // null = admin hasn't configured this district
     }
 
-    const districtCharge = form.district ? getDistrictCharge(form.district) : 80;
+    // const districtCharge = form.district ? getDistrictCharge(form.district) : 80;
+    // const hasFreeDeliveryThreshold = typeof settings?.freeDeliveryAmount === 'number' && settings.freeDeliveryAmount > 0;
+    // const shippingCost = hasFreeDeliveryThreshold && subtotal >= settings.freeDeliveryAmount ? 0 : districtCharge;
+    // const total = subtotal + shippingCost;
+
+    const districtCharge = form.district ? getDistrictCharge(form.district) : null;
     const hasFreeDeliveryThreshold = typeof settings?.freeDeliveryAmount === 'number' && settings.freeDeliveryAmount > 0;
-    const shippingCost = hasFreeDeliveryThreshold && subtotal >= settings.freeDeliveryAmount ? 0 : districtCharge;
-    const total = subtotal + shippingCost;
+    const shippingCost = hasFreeDeliveryThreshold && subtotal >= settings.freeDeliveryAmount
+        ? 0
+        : districtCharge;
+    const total = subtotal + (shippingCost || 0);
+    const deliveryUnavailable = form.district && districtCharge === null;
 
     async function handlePlaceOrder() {
         setError('');
@@ -273,6 +281,10 @@ export default function CheckoutPage() {
 
         if (!name || !email || !phone || !street || !city || !district) {
             return setError('Please fill in all required fields');
+        }
+
+        if (deliveryUnavailable) {
+            return setError('We currently don\'t deliver to this district. Please choose another.');
         }
 
         // Just an extra failsafe protection rule
@@ -592,7 +604,7 @@ export default function CheckoutPage() {
                                 {shippingCost === 0 ? (
                                     <span className="text-green-600 text-sm font-medium">Free</span>
                                 ) : (
-                                    <span className="text-black text-sm font-medium">৳{shippingCost}</span>
+                                    <span>{shippingCost === null ? 'Not available' : `৳${shippingCost}`}</span>
                                 )}
                             </div>
 
@@ -613,7 +625,7 @@ export default function CheckoutPage() {
 
                     <button
                         onClick={handlePlaceOrder}
-                        disabled={loading}
+                        disabled={loading || deliveryUnavailable}
                         className="glass-btn-primary py-4 text-base font-bold text-black border border-black/20 rounded-3xl transition hover:bg-black/10"
                     >
                         {loading ? 'Placing Order...' : 'Place Order'}
