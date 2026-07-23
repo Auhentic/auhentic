@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { productHref } from '@/lib/slugify';
 
 export default function TopSellingSlider({ products }) {
     const total = products?.length || 0;
@@ -127,7 +128,7 @@ export default function TopSellingSlider({ products }) {
                                 className={`h-auto lg:h-full box-border [--flex-single-item:0_0_calc(100%-8px)] sm:[--flex-single-item:0_0_calc(50%-6px)] ${total !== 1 ? 'pr-3' : ''}`}
                             >
                                 <Link
-                                    href={`/products/${product._id}`}
+                                    href={productHref(product)}
                                     className="relative w-full h-auto lg:h-full rounded-3xl overflow-hidden flex flex-col items-center justify-center group bg-transparent hover:scale-[1.01] transition duration-200"
                                 >
                                     <div className="relative w-full aspect-square lg:aspect-auto lg:flex-1 lg:min-h-0 bg-transparent overflow-hidden rounded-3xl">

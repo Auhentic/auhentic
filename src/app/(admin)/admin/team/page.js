@@ -160,6 +160,9 @@ export default function TeamPage() {
                                         ? new Date(user.dateOfBirth).toLocaleDateString('en-BD')
                                         : 'Not provided'}
                                 </p>
+                                <p className="text-sm text-black/60">
+                                    Gender: {user.gender || 'Not provided'}
+                                </p>
                                 <div>
                                     <p className="text-black/30 text-xs">
                                         Joined {new Date(user.createdAt).toLocaleDateString('en-BD', {

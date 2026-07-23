@@ -49,6 +49,7 @@ export default function ProfilePage() {
                     district: u.address?.district || '',
                     postalCode: u.address?.postalCode || '',
                     dateOfBirth: u.dateOfBirth || '',
+                    gender: u.gender || '',
                 });
                 setPhoto(u.photo?.url ? u.photo : null);
             } catch {
@@ -137,12 +138,13 @@ export default function ProfilePage() {
                     name: form.name,
                     phone: form.phone,
                     address: {
-                        street: form.street,     // ← was street
+                        street: form.street,
                         city: form.city,
                         district: form.district,
-                        postalCode: form.postalCode,         // ← was postalCode
+                        postalCode: form.postalCode,
                     },
                     dateOfBirth: form.dateOfBirth,
+                    gender: form.gender,
                     photo,
                 }),
             });
@@ -255,8 +257,21 @@ export default function ProfilePage() {
                         />
                     </div>
 
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm text-black/60">Gender (optional)</label>
+                        <select
+                            value={form.gender || ''}
+                            onChange={(e) => setForm({ ...form, gender: e.target.value })}
+                            className="glass-input rounded-3xl w-full text-black"
+                        >
+                            <option value="">Select</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+
                 </div>
-            </div>
+            </div >
 
             <div className="glass p-6 rounded-3xl mt-6 mb-3.5">
                 <h3 className="text-black font-semibold text-sm mb-4">Change Password</h3>
@@ -419,6 +434,6 @@ export default function ProfilePage() {
             >
                 {saving ? 'Saving...' : 'Save Changes'}
             </button>
-        </div>
+        </div >
     );
 }

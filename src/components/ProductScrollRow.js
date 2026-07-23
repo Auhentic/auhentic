@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import OfferCountdown from './OfferCountdown';
 import { isOfferActive } from '@/lib/offerUtils';
+import { productHref } from '@/lib/slugify';
 
 export default function ProductScrollRow({ title, icon, seeAllHref, seeAllLabel, products }) {
     const total = products?.length || 0;
@@ -191,7 +192,7 @@ export default function ProductScrollRow({ title, icon, seeAllHref, seeAllLabel,
                         return (
                             <Link
                                 key={`${product._id}-slide-${i}`}
-                                href={`/products/${product._id}`}
+                                href={productHref(product)}
                                 style={{
                                     // FIXED: Keeps item width precisely responsive to the gap value
                                     flex: `0 0 calc(100% / var(--items-per-view) - (12px * (var(--items-per-view) - 1) / var(--items-per-view)))`

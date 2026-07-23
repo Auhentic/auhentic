@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema(
             type: String,
             trim: true,
         },
+        gender: {
+            type: String,
+            enum: ['male', 'female', ''],
+        },
         address: {
             street: String,
             city: String,

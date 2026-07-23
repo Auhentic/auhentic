@@ -24,7 +24,11 @@ export async function GET(request, { params }) {
 
         const { id } = await params;
 
-        const product = await Product.findById(id).populate(
+        const isObjectId = /^[a-f0-9]{24}$/i.test(id);
+        const product = await (isObjectId
+            ? Product.findById(id)
+            : Product.findOne({ slug: id })
+        ).populate(
             'reviews.user',
             'name'
         );

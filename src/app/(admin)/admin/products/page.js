@@ -27,9 +27,11 @@ export default function AdminProductsPage() {
         description: '',
         price: '',
         category: '',
+        subCategory: '',
         stock: '',
         isOnOffer: false,
         discountPercent: '',
+        reviewLink: '',
         offerLabel: '',
         isTopSelling: false,
         variants: [],
@@ -134,6 +136,8 @@ export default function AdminProductsPage() {
             description: product.description,
             price: product.price,
             category: product.category,
+            subCategory: product.subCategory || '',
+            reviewLink: product.reviewLink || '',
             stock: product.stock,
             isOnOffer: product.offer?.isOnOffer || false,
             discountPercent: product.offer?.discountPercent || '',
@@ -221,6 +225,8 @@ export default function AdminProductsPage() {
                 description,
                 price: Number(price),
                 category,
+                subCategory: form.subCategory?.trim() || '',
+                reviewLink: form.reviewLink?.trim() || '',
                 stock: Number(stock),
                 images,
                 offer: {
@@ -372,6 +378,28 @@ export default function AdminProductsPage() {
                                 value={form.category}
                                 onChange={handleChange}
                                 placeholder="e.g. Snacks, Drinks"
+                                className="glass-input text-black placeholder:text-black/40 rounded-3xl"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="text-black/70 text-sm mb-1 block">Sub-Category (optional)</label>
+                            <input
+                                name="subCategory"
+                                value={form.subCategory}
+                                onChange={handleChange}
+                                placeholder="e.g. Pound Cake, Tub Cake"
+                                className="glass-input text-black placeholder:text-black/40 rounded-3xl"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="text-black/70 text-sm mb-1 block">Review Link (optional)</label>
+                            <input
+                                name="reviewLink"
+                                value={form.reviewLink}
+                                onChange={handleChange}
+                                placeholder="Facebook or Instagram review link"
                                 className="glass-input text-black placeholder:text-black/40 rounded-3xl"
                             />
                         </div>
@@ -754,7 +782,9 @@ export default function AdminProductsPage() {
                                 {/* Info */}
                                 <div className="flex-1">
                                     <p className="text-black font-medium text-sm">{product.name}</p>
-                                    <p className="text-black/60 text-xs">{product.category}</p>
+                                    <p className="text-black/60 text-xs">
+                                        {product.category}{product.subCategory ? ` · ${product.subCategory}` : ''}
+                                    </p>
                                     <div className="flex items-center gap-2">
                                         <p className="text-blue-600 text-sm font-bold">৳{product.price.toLocaleString()}</p>
                                         {product.offer?.isOnOffer && (
@@ -783,6 +813,7 @@ export default function AdminProductsPage() {
                                     />
                                 </div>
 
+                                {/* Actions */}
                                 {/* Actions */}
                                 <div className="flex gap-2">
                                     <button

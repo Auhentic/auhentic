@@ -32,12 +32,27 @@ const productSchema = new mongoose.Schema(
             required: [true, 'Category is required'],
             trim: true,
         },
+        subCategory: {
+            type: String,
+            trim: true,
+            default: '', // fully optional — admin can leave this blank
+        },
+        reviewLink: {
+            type: String,
+            trim: true,
+            default: '',
+        },
+        slug: {
+            type: String,
+            unique: true,
+            sparse: true,
+        },
         // Already perfectly set up for multiple images!
         images: [
             {
                 url: { type: String, required: true },   // Cloudinary URL
                 publicId: { type: String, required: true }, // Cloudinary public_id
-            },
+            }
         ],
         stock: {
             type: Number,

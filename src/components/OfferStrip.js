@@ -17,7 +17,7 @@ export default function OfferStrip({ products }) {
                 return (
                     <Link
                         key={product._id}
-                        href={`/products/${product._id}`}
+                        href={productHref(product)}
                         className="relative flex-shrink-0 h-full aspect-[2/1] rounded-3xl overflow-hidden glass group"
                     >
                         {product.images?.[0]?.url ? (
@@ -41,7 +41,7 @@ export default function OfferStrip({ products }) {
                             <h3 className="text-white font-semibold text-sm line-clamp-1 mb-0.5">
                                 {product.name}
                             </h3>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">                                             
                                 <span className="text-white font-bold text-sm">
                                     ৳{discountedPrice.toLocaleString()}
                                 </span>

@@ -15,11 +15,11 @@ export async function PUT(request) {
             );
         }
 
-        const { name, phone, address, dateOfBirth, photo } = await request.json();
+        const { name, phone, address, dateOfBirth, gender, photo } = await request.json();
 
-        if (!name || !phone) {
+        if (!name || !phone || !gender) {
             return NextResponse.json(
-                { message: 'Name and phone are required' },
+                { message: 'Name, Gender and phone are required' },
                 { status: 400 }
             );
         }
@@ -28,6 +28,7 @@ export async function PUT(request) {
             name,
             phone,
             address,
+            gender,
             dateOfBirth: dateOfBirth || null,
         };
         if (photo) updateFields.photo = photo; // { url, publicId }

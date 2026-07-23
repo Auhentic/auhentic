@@ -96,7 +96,6 @@ export default function OrderDetailPage() {
         <div className="max-w-3xl mx-auto px-4 py-12">
 
             {/* Success Banner */}
-            {/* Success Banner */}
             {isSuccess && (
                 <div className="mb-6 p-4 rounded-xl bg-green-700/20 border border-[#3E2723]/30 text-[#3E2723] text-center">
                     <p className="text-lg font-bold mb-1">🎉 Order Placed Successfully!</p>
@@ -109,6 +108,12 @@ export default function OrderDetailPage() {
                     <p className="text-sm text-[#3E2723] mt-1">
                         আপনার অর্ডারটি নিশ্চিত করার জন্য আপনার নাম্বারে একটি কল আসবে।
                     </p>
+                    <Link
+                        href="/products"
+                        className="glass-btn-primary inline-block mt-4 px-6 py-2 w-auto text-sm"
+                    >
+                        🛍️ Shop More
+                    </Link>
                 </div>
             )}
 

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { isOfferActive } from '@/lib/offerUtils';
 import OfferCountdown from './OfferCountdown';
+import { productHref } from '@/lib/slugify';
 
 export default function ProductCard({ product }) {
     function addToCart() {
@@ -47,9 +48,6 @@ export default function ProductCard({ product }) {
                 currency: 'BDT',
             });
         }
-        
-        // temporary — replace with toast later
-        alert(`${product.name} added to cart!`);
     }
 
     // calculate discounted price if on offer
@@ -63,7 +61,6 @@ export default function ProductCard({ product }) {
     return (
         <div className="glass p-4 flex flex-col gap-3 hover:border-black/20 transition rounded-3xl relative">
 
-            {/* Offer Badge */}
             {/* Offer Badge */}
             {isOnOffer && (
                 <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 items-start">
@@ -79,7 +76,7 @@ export default function ProductCard({ product }) {
             )}
 
             {/* Product Image */}
-            <Link href={`/products/${product._id}`}>
+            <Link href={productHref(product)}>
                 <div className="relative w-full aspect-square rounded-3xl overflow-hidden bg-black/5">
                     {product.images?.[0]?.url ? (
                         <Image
@@ -98,7 +95,7 @@ export default function ProductCard({ product }) {
 
             {/* Product Info */}
             <div className="flex flex-col gap-1">
-                <Link href={`/products/${product._id}`}>
+                <Link href={productHref(product)}>
                     <h3 className="text-black font-medium text-sm line-clamp-2 hover:text-[#c8860a] transition">
                         {product.name}
                     </h3>
