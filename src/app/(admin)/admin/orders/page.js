@@ -270,7 +270,7 @@ export default function AdminOrdersPage() {
                                         <div className="flex-1 flex flex-col md:flex-row md:items-center justify-between gap-2">
                                             <div>
                                                 <p className="text-black text-sm font-medium">
-                                                    Order #{order.orderNumber ? `AUH-${order.orderNumber}` : order._id.slice(-8).toUpperCase()}
+                                                    Order #{order.orderNumber ? `WEB-AUH-${order.orderNumber}` : order._id.slice(-8).toUpperCase()}
                                                 </p>
                                                 <p className="text-black/50 text-xs">
                                                     {new Date(order.createdAt).toLocaleDateString('en-BD', {
@@ -294,7 +294,7 @@ export default function AdminOrdersPage() {
                                         {order.shippingAddress?.phone && (
                                             <a
                                                 href={`https://wa.me/${order.shippingAddress.phone.replace(/^0/, '880')}?text=${encodeURIComponent(
-                                                    `Hi ${order.guestInfo?.name || order.user?.name || 'there'},\nconfirming your Auhentic order #${order.orderNumber ? `AUH-${order.orderNumber}` : ''}\ntotal ৳${order.total}.\nReply to confirm!`
+                                                    `Hi ${order.guestInfo?.name || order.user?.name || 'there'},\nconfirming your Auhentic order #${order.orderNumber ? `WEB-AUH-${order.orderNumber}` : ''}\ntotal ৳${order.total}.\nReply to confirm!`
                                                 )}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"

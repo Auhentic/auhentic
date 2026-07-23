@@ -45,7 +45,8 @@ export default function TrackOrderPage() {
                         type="text"
                         value={orderNumber}
                         onChange={(e) => setOrderNumber(e.target.value)}
-                        placeholder="Order number (e.g. AUH-1023 or 1023)"
+                        // placeholder="Order number (e.g. AUH-1023 or 1023)"
+                        placeholder="Order number (e.g. WEB-AUH-1023 or 1023)"
                         className="glass-input rounded-3xl"
                     />
                     <input

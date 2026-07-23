@@ -121,7 +121,7 @@ export default function OrderDetailPage() {
             <div className="flex items-center justify-between mb-8">
                 <div>
                     <h1 className="text-2xl font-bold text-black">
-                        Order #{order.orderNumber ? `AUH-${order.orderNumber}` : order._id.slice(-8).toUpperCase()}
+                        Order #{order.orderNumber ? `WEB-AUH-${order.orderNumber}` : order._id.slice(-8).toUpperCase()}
                     </h1>
                     <p className="text-black/40 text-sm mt-1">
                         Placed on{' '}

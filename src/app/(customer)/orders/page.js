@@ -77,7 +77,7 @@ export default function OrdersPage() {
                             {/* Order Info */}
                             <div>
                                 <p className="text-black font-medium text-sm">
-                                    Order #{order.orderNumber ? `AUH-${order.orderNumber}` : order._id.slice(-8).toUpperCase()}
+                                    Order #{order.orderNumber ? `WEB-AUH-${order.orderNumber}` : order._id.slice(-8).toUpperCase()}
                                 </p>
                                 <p className="text-black/40 text-xs mt-1">
                                     {new Date(order.createdAt).toLocaleDateString('en-BD', {
